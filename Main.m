@@ -28,7 +28,7 @@ end
 %% Initializing Parameters
 %In this section we initialize the cells that will hold the rock's
 %properties in each time step and initiate other variables.
-Rock_Matrixes=cell(1,[]); %will hold the rock's matrix in every timestep.
+Initial_Rock_Matrix = []; %will hold the rock's matrix in every timestep.
 %initializing the variables that holds the rock's boundary conditions.
 Width_Threshold=0;  
 Height_Threshold=0;
@@ -45,20 +45,20 @@ Chunck_Dimensions = []; %stores all area data as sparse data, for histogram
 %% Building the Rock (Time Step 0)
 % Create_Rock_Image_with_boundaries
 if (RockType == 1)
-[Rock_Matrixes{1,1},Rock_Image,Height_Threshold,Width_Threshold]...
+[Initial_Rock_Matrix,Rock_Image,Height_Threshold,Width_Threshold]...
     =Create_Rock_Image_with_boundaries(DoloRatio,NumGrains);%creating the initial rock
 % Create_Rock_As_Table
 elseif (RockType == 2)
-[Rock_Matrixes{1,1},Rock_Image,Height_Threshold,Width_Threshold]...
+[Initial_Rock_Matrix,Rock_Image,Height_Threshold,Width_Threshold]...
       =Create_Rock_As_Table(floor(sqrt(NumGrains)));
 % Create_Rock_As_Brickwall
 elseif (RockType == 3)
-[Rock_Matrixes{1,1},Rock_Image,Height_Threshold,Width_Threshold]...
+[Initial_Rock_Matrix,Rock_Image,Height_Threshold,Width_Threshold]...
       =Create_Rock_As_Brickwall(floor(sqrt(NumGrains)));
     end
 % For testing
 if (IsSmallSize == 1)
-    Rock_Matrixes{1,1} = Rock_Matrixes{1,1}(200:600,200:600,:);
+    Initial_Rock_Matrix = Initial_Rock_Matrix(200:600,200:600,:);
     Rock_Image = Rock_Image(200:600,200:600,:);
     Height_Threshold=5;
     Width_Threshold=5;
@@ -69,9 +69,9 @@ Rock_Frames(1)=im2frame(Rock_Image);
 % to a movie that visualizes the dissolution process.  
 %% Initializing Rock dissolution (Time Step 1)
 %copying the rock matrix and than replacing the upper layer with solution 
-Rock_Matrixes{1,2}=Rock_Matrixes{1,1};%copying the matrix
-Rock_Matrixes{1,2}(1,:)=0;%the value 0 represents dissolution
-Rock_Frames(2)=im2frame(label2rgb(Rock_Matrixes{1,2}));%converting image to frame
+Current_Rock_Matrix=Initial_Rock_Matrix;%copying the matrix
+Current_Rock_Matrix(1,:)=0;%the value 0 represents dissolution
+Rock_Frames(2)=im2frame(label2rgb(Current_Rock_Matrix));%converting image to frame
 %% Creating frames for dissolution until complete dissolution (step 2:n)
 % In this section we first create a matrix of the bounding area where the
 % Dissolution is not influenced by boundary conditions. Later the
@@ -80,21 +80,21 @@ Rock_Frames(2)=im2frame(label2rgb(Rock_Matrixes{1,2}));%converting image to fram
 % In every timestep the rock's matrix, chunk events and chunk area is being
 % calculated and the rock's image is being converted into frame.
 ii=2; %Time steps
-BBox=[1,length(Rock_Matrixes{1,2}(:,1))-Height_Threshold,...
-    Width_Threshold,length(Rock_Matrixes{1,ii}(1,:))-Width_Threshold];
+BBox=[1,length(Current_Rock_Matrix(:,1))-Height_Threshold,...
+    Width_Threshold,length(Current_Rock_Matrix(1,:))-Width_Threshold];
 %the min row, max row, min col, max col in which calculation of procceses 
 % is not influenced by boundary conditions
-BboxMatrix=zeros(size(Rock_Matrixes{1,ii}));%initializing bbox matrix
+BboxMatrix=zeros(size(Current_Rock_Matrix));%initializing bbox matrix
 BboxMatrix(BBox(1):BBox(2),BBox(3):BBox(4))=1;%creating the matrix of bbox
-while (sum(sum(Rock_Matrixes{1,ii}(BBox(1):BBox(2),BBox(3):BBox(4))~=0))>0)
+while (sum(sum(Current_Rock_Matrix(BBox(1):BBox(2),BBox(3):BBox(4))~=0))>0)
 % Dissolution will stop when the pixels inside bbox have been disolved
     ii=ii+1; %time steps
     %The function 'Dissolve_Rock' is used here to calculate the rock
     %current matrix, Chunck_Events and Mechanical_Dissolution for each time
     %step.
-    [ Rock_Matrixes{1,ii},CurrentChunck_Events,...
+    [ Current_Rock_Matrix,CurrentChunck_Events,...
     CurrentMechanical_Dissolution]=...
-    Dissolve_Rock(Rock_Matrixes{1,ii-1},BboxMatrix);
+    Dissolve_Rock(Initial_Rock_Matrix,BboxMatrix);
     Chunck_Events(ii)= length(CurrentChunck_Events); %updating chuck events
     for i = 1:Chunck_Events(ii)
         Chunck_Area = CurrentChunck_Events(i).Area;
@@ -107,7 +107,7 @@ while (sum(sum(Rock_Matrixes{1,ii}(BBox(1):BBox(2),BBox(3):BBox(4))~=0))>0)
     end
     Mechanical_Dissolution(ii)=CurrentMechanical_Dissolution; ...
     %updating chunck area
-    Rock_Frames(ii)=im2frame(label2rgb(Rock_Matrixes{1,ii})); %saving as frame
+    Rock_Frames(ii)=im2frame(label2rgb(Current_Rock_Matrix)); %saving as frame
 end
 
 %% Calculating Mechanical Dissolution percentage 
