@@ -60,8 +60,6 @@ elseif (RockType == 3)
 if (IsSmallSize == 1)
     Previous_Rock_Matrix = Previous_Rock_Matrix(200:600,200:600,:);
     Rock_Image = Rock_Image(200:600,200:600,:);
-    Height_Threshold=5;
-    Width_Threshold=5;
 end
 Rock_Frames(1)=im2frame(Rock_Image);
 % creating frame from 1st rock
@@ -107,7 +105,9 @@ while (sum(sum(Previous_Rock_Matrix(BBox(1):BBox(2),BBox(3):BBox(4))~=0))>0)
     end
     Mechanical_Dissolution(ii)=CurrentMechanical_Dissolution; ...
     %updating chunck area
-    Rock_Frames(ii)=im2frame(label2rgb(Current_Rock_Matrix)); %saving as frame
+    if (mod(ii,16) == 0)
+        Rock_Frames(floor(ii/16))=im2frame(label2rgb(Current_Rock_Matrix)); %saving as frame
+    end
     Previous_Rock_Matrix = Current_Rock_Matrix;
 end
 
@@ -134,14 +134,13 @@ disp(strcat('Model results for- ',num2str(NumGrains),' grains- '...
   ' -Chunk Events ', num2str(Mechanical_Dissolution_percentage),...
   ' -Mechanical Dissolution Percentage'));
 %% Creating a movie from the frames
-filename=strcat(num2str(NumGrains),' Grains_'...
+filename=strcat('D:\Google Drive\Documents\Eyal\Model Codes\runs\WS',num2str(NumGrains),' Grains_'...
   ,num2str(DoloRatio),' % Dolomite_',num2str(length(Rock_Frames)),...
   ' -time steps_', num2str(sum(Chunck_Events)),...
   ' -Chunk Events_', num2str(Mechanical_Dissolution_percentage),...
   ' -Mechanical%''.mat');
-save(filename,'Rock_Frames','-v7.3');
 
-save(strcat('WS',filename),'*','-v7.3');
+save(filename,'*','-v7.3');
 
 implay(Rock_Frames);
 %% Plotting process information
