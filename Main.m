@@ -67,7 +67,7 @@ Rock_Frames(1)=im2frame(Rock_Image);
 % creating frame from 1st rock
 % every step is being recorded as a frame, all the frames will be converted 
 % to a movie that visualizes the dissolution process.  
-%% Initializing Rock dissolution (Time Step 1)s
+%% Initializing Rock dissolution (Time Step 1)
 %copying the rock matrix and than replacing the upper layer with solution 
 Rock_Matrixes{1,2}=Rock_Matrixes{1,1};%copying the matrix
 Rock_Matrixes{1,2}(1,:)=0;%the value 0 represents dissolution
