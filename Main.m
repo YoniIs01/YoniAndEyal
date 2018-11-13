@@ -13,7 +13,7 @@ if (RockType == 1)
 else
     DoloRatio = 0;
 end
-
+;
 %The number of grains in the simulated rock. The larger the number of
 %grains, the smaller the size of grains in the cross section. This 
 %parameter usually varies from 100 to 10000.
