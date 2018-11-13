@@ -71,7 +71,8 @@ Rock_Frames(1)=im2frame(Rock_Image);
 %copying the rock matrix and than replacing the upper layer with solution 
 Rock_Matrixes{1,2}=Rock_Matrixes{1,1};%copying the matrix
 Rock_Matrixes{1,2}(1,:)=0;%the value 0 represents dissolution
-Rock_Frames(2)=im2frame(label2rgb(Rock_Matrixes{1,2}));%converting image to frame
+NextRock_Image=label2rgb(Rock_Matrixes{1,2});%saving the matrix as image
+Rock_Frames(2)=im2frame(NextRock_Image);%converting image to frame
 %% Creating frames for dissolution until complete dissolution (step 2:n)
 % In this section we first create a matrix of the bounding area where the
 % Dissolution is not influenced by boundary conditions. Later the
@@ -107,7 +108,8 @@ while (sum(sum(Rock_Matrixes{1,ii}(BBox(1):BBox(2),BBox(3):BBox(4))~=0))>0)
     end
     Mechanical_Dissolution(ii)=CurrentMechanical_Dissolution; ...
     %updating chunck area
-    Rock_Frames(ii)=im2frame(label2rgb(Rock_Matrixes{1,ii})); %saving as frame
+    Rock_Images{1,ii}=); %saving as image
+    Rock_Frames(ii)=im2frame(label2rgb(Rock_Matrixes{1,ii}); %saving as frame
 end
 
 %% Calculating Mechanical Dissolution percentage 
