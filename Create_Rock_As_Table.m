@@ -7,7 +7,7 @@ function[ Rock_Matrix , Rock_Image, Height, Width]=...
 %as boundary conditions.
 %% Create a rock As A Table
 [Line_X_Coordinates ,Line_Y_Coordinates]=meshgrid(0:1/Num_Of_Grains_In_Row:1);
-figure%('Visible','Off'); 
+figure('Visible','Off'); 
 hold on;
 plot(Line_X_Coordinates ,Line_Y_Coordinates,'black','LineWidth',0.2); 
 plot(Line_Y_Coordinates, Line_X_Coordinates,'black','LineWidth',0.2); 
