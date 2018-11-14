@@ -43,7 +43,8 @@ CC=bwconncomp(Rock_BW_Image); %finding coonected components in the rock
 Rock_Matrix = labelmatrix(CC); %labeling every grain in the rock's image
 %% Defining the rock's composition
 
-Rock_Matrix(Rock_Matrix~= (CC.NumObjects+1) & Rock_Matrix~=0)=1; 
+Rock_Matrix(Rock_Matrix~= (CC.NumObjects+1) & Rock_Matrix~=0)=...
+     round(CC.NumObjects/2);%labeling no-dolomite with a unique number (color)
 %% Definning a different dissolution coefficient to different boundaries
 Calc=Boundaries(Rock_Matrix,round(CC.NumObjects/2),CC.NumObjects-2); %calcite boundaries
 %% Assigning dissolution coeficients to pixels according to rock property
