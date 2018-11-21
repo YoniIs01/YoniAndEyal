@@ -3,10 +3,10 @@ clc, clear, close all;
 User_Message = ...
 'please enter rock type, 1 for voronoi, 2 for table, 3 for brickwall: ';
 RockType = str2double(cell2mat(inputdlg(User_Message)));
-IsSmallSize = str2double(cell2mat(inputdlg('please enter 1 for small size mode')));
-if (RockType == 1)
-    %Dolomite to Calcite ratio in the Rock is from 0 (all Calcite) to 1 (all
-    %Dolomite).
+%IsSmallSize = str2double(cell2mat(inputdlg('please enter 1 for small-size mode')));
+if (RockType == 1) %voronoi
+    %Dolomite to Calcite ratio in the Rock is from 0 (all Calcite) 
+    %to 1 (all Dolomite).
     User_Message_1 = ...
     'please insert Dolomite to Calcite ratio in the Rock (between 0 and 1): ';
     DoloRatio = str2double(cell2mat(inputdlg(User_Message_1)));
@@ -43,26 +43,26 @@ Chunck_Events(1:2)=0; %Calcultes the total chunk events
 Chunck_Areas = []; %stores all area data as sparse data, for histogram
 Chunck_Dimensions = []; %stores all area data as sparse data, for histogram
 %% Building the Rock (Time Step 0)
-% Create_Rock_Image_with_boundaries
-if (RockType == 1)
-[Previous_Rock_Matrix,Rock_Image,Height_Threshold,Width_Threshold]...
-    =Create_Rock_Image_with_boundaries(DoloRatio,NumGrains);%creating the initial rock
-% Create_Rock_As_Table
-elseif (RockType == 2)
-[Previous_Rock_Matrix,Rock_Image,Height_Threshold,Width_Threshold]...
-      =Create_Rock_As_Table(floor(sqrt(NumGrains)));
-% Create_Rock_As_Brickwall
-elseif (RockType == 3)
-[Previous_Rock_Matrix,Rock_Image,Height_Threshold,Width_Threshold]...
-      =Create_Rock_As_Brickwall(floor(sqrt(NumGrains)));
-    end
-% For testing
+if (RockType == 1) % Create_Rock_As_voronoi
+    [Previous_Rock_Matrix,Rock_Image,Height_Threshold,Width_Threshold]...
+        =Create_Rock_Image_with_boundaries(DoloRatio,NumGrains);
+    
+elseif (RockType == 2) % Create_Rock_As_Table
+    [Previous_Rock_Matrix,Rock_Image,Height_Threshold,Width_Threshold]...
+        =Create_Rock_As_Table(floor(sqrt(NumGrains)));
+    
+elseif (RockType == 3) % Create_Rock_As_Brickwall
+    [Previous_Rock_Matrix,Rock_Image,Height_Threshold,Width_Threshold]...
+        =Create_Rock_As_Brickwall(floor(sqrt(NumGrains)));
+end
+%{ 
+For testing
 if (IsSmallSize == 1)
     Previous_Rock_Matrix = Previous_Rock_Matrix(200:600,200:600,:);
     Rock_Image = Rock_Image(200:600,200:600,:);
 end
-Rock_Frames(1)=im2frame(Rock_Image);
-% creating frame from 1st rock
+%}
+Rock_Frames(1)=im2frame(Rock_Image); % creating frame from 1st rock
 % every step is being recorded as a frame, all the frames will be converted 
 % to a movie that visualizes the dissolution process.  
 %% Initializing Rock dissolution (Time Step 1)
@@ -85,12 +85,12 @@ BBox=[1,length(Current_Rock_Matrix(:,1))-Height_Threshold,...
 BboxMatrix=zeros(size(Current_Rock_Matrix));%initializing bbox matrix
 BboxMatrix(BBox(1):BBox(2),BBox(3):BBox(4))=1;%creating the matrix of bbox
 while (sum(sum(Previous_Rock_Matrix(BBox(1):BBox(2),BBox(3):BBox(4))~=0))>0)
-% Dissolution will stop when the pixels inside bbox have been disolved
+    % Dissolution will stop when the pixels inside bbox have been disolved
     ii=ii+1; %time steps
     %The function 'Dissolve_Rock' is used here to calculate the rock
     %current matrix, Chunck_Events and Mechanical_Dissolution for each time
     %step.
-    [ Current_Rock_Matrix,CurrentChunck_Events,...
+    [Current_Rock_Matrix,CurrentChunck_Events,...
     CurrentMechanical_Dissolution]=...
     Dissolve_Rock(Previous_Rock_Matrix,BboxMatrix);
     Chunck_Events(ii)= length(CurrentChunck_Events); %updating chuck events
@@ -103,9 +103,9 @@ while (sum(sum(Previous_Rock_Matrix(BBox(1):BBox(2),BBox(3):BBox(4))~=0))>0)
         Chunck_Areas = [Chunck_Areas Chunck_Area];
         Chunck_Dimensions = [Chunck_Dimensions Chunck_Dimension];
     end
-    Mechanical_Dissolution(ii)=CurrentMechanical_Dissolution; ...
-    %updating chunck area
-    if (mod(ii,16) == 0)
+    Mechanical_Dissolution(ii)=CurrentMechanical_Dissolution; %updating chunck area
+    
+    if (mod(ii,16) == 0) %saving every 16 frames for the movie
         Rock_Frames(floor(ii/16))=im2frame(label2rgb(Current_Rock_Matrix)); %saving as frame
     end
     Previous_Rock_Matrix = Current_Rock_Matrix;
@@ -129,19 +129,18 @@ Chunck_Dimensions_Frequency = Chunck_Dimensions_Counter;
 Chunck_Dimensions_Frequency(:,2) = Chunck_Dimensions_Frequency(:,2) ./ length(Rock_Frames);
 %% Summary of Model output
 disp(strcat('Model results for- ',num2str(NumGrains),' grains- '...
-  ,num2str(DoloRatio),'% Dolomite is:',num2str(length(Rock_Frames)),...
-  ' -timesteps ', num2str(sum(Chunck_Events)),...
-  ' -Chunk Events ', num2str(Mechanical_Dissolution_percentage),...
+  ,num2str(DoloRatio),'% Dolomite is:',num2str(ii),' -timesteps ',...
+  num2str(sum(Chunck_Events)),' -Chunk Events ', ...
+  num2str(Mechanical_Dissolution_percentage),...
   ' -Mechanical Dissolution Percentage'));
 %% Creating a movie from the frames
-filename=strcat('D:\Google Drive\Documents\Eyal\Model Codes\runs\WS',num2str(NumGrains),' Grains_'...
-  ,num2str(DoloRatio),' % Dolomite_',num2str(length(Rock_Frames)),...
-  ' -time steps_', num2str(sum(Chunck_Events)),...
+filename=strcat('D:\Google Drive\Documents\Eyal\Model Codes\runs\WS',...
+    num2str(NumGrains),' Grains_',num2str(DoloRatio),' % Dolomite_',...
+    num2str(ii),' -time steps_', num2str(sum(Chunck_Events)),...
   ' -Chunk Events_', num2str(Mechanical_Dissolution_percentage),...
   ' -Mechanical%''.mat');
 
 save(filename,'*','-v7.3');
-
 implay(Rock_Frames);
 %% Plotting process information
 figure (2);
