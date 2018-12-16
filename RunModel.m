@@ -10,6 +10,7 @@ function [ Total_Time_Steps,...
 %   NumGrains - The number of grains in the simulated rock. The larger the number of
 %               grains, the smaller the size of grains in the cross section. This 
 %               parameter usually varies from 100 to 10000.
+    rng('shuffle');
     %% Validating rock parameters 
     if (RockType ~= 1)
         DoloRatio = 0;
