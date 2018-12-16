@@ -1,4 +1,4 @@
-clc, clear, close all;
+clc, clear, close all;rng('shuffle');
 %% Receiving rock parameters from user
 User_Message = ...
 'please enter rock type, 1 for voronoi, 2 for table, 3 for brickwall: ';
