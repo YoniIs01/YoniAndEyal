@@ -1,16 +1,19 @@
-function [ Total_Time_Steps,...
+function [ Data, Total_Time_Steps,...
           Mechanical_Dissolution_percentage,...
           Chemical_Dissolution_percentage,...
           Mechanical_Dissolution_Events ] ...
         = RunModel( RockType, NumGrains, DoloRatio, IsSmallSize, ToPlot, SaveWsAndMovie)
 %RUNMODEL Summary of this function goes here
-%   RockType - 1 for voronoi, 2 for table, 3 for brickwall
+%   RockType - 1 for voronoi, 2 for table, 3 for brickwall, 4 for Stylolites
 %   IsSmallSize - 1 for small size mode
 %   DoloRatio - Case Rock Type is 1, Dolomite to Calcite ratio in the Rock is from 0 (all Calcite) to 1 (all Dolomite).
 %   NumGrains - The number of grains in the simulated rock. The larger the number of
 %               grains, the smaller the size of grains in the cross section. This 
 %               parameter usually varies from 100 to 10000.
     rng('shuffle');
+    addpath('./obj/');
+    %% ModelData init
+    Data = ModelData(RockType, NumGrains, DoloRatio);
     %% Validating rock parameters 
     if (RockType ~= 1)
         DoloRatio = 0;
@@ -50,6 +53,10 @@ function [ Total_Time_Steps,...
     elseif (RockType == 3)
     [Previous_Rock_Matrix,Rock_Image,Height_Threshold,Width_Threshold]...
           =Create_Rock_As_Brickwall(floor(sqrt(NumGrains)));
+    % Create_Rock_As_Stylolites
+    elseif (RockType == 4)
+    [Previous_Rock_Matrix,Rock_Image,Height_Threshold,Width_Threshold]...
+          =Create_Rock_As_Stylolites();
         end
     % For testing
     if (IsSmallSize == 1)
@@ -60,6 +67,8 @@ function [ Total_Time_Steps,...
     % creating frame from 1st rock
     % every step is being recorded as a frame, all the frames will be converted 
     % to a movie that visualizes the dissolution process.  
+    
+    
     %% Initializing Rock dissolution (Time Step 1)
     %copying the rock matrix and than replacing the upper layer with solution 
     Previous_Rock_Matrix(1,:)=0;%the value 0 represents dissolution
@@ -72,7 +81,7 @@ function [ Total_Time_Steps,...
     % bounding box has not been completely dissolved.
     % In every timestep the rock's matrix, chunk events and chunk area is being
     % calculated and the rock's image is being converted into frame.
-    ii=2; %Time steps
+    ii=1; %Time steps
     BBox=[1,length(Current_Rock_Matrix(:,1))-Height_Threshold,...
         Width_Threshold,length(Current_Rock_Matrix(1,:))-Width_Threshold];
     %the min row, max row, min col, max col in which calculation of procceses 
@@ -82,14 +91,16 @@ function [ Total_Time_Steps,...
     while (sum(sum(Previous_Rock_Matrix(BBox(1):BBox(2),BBox(3):BBox(4))~=0))>0)
     % Dissolution will stop when the pixels inside bbox have been disolved
         ii=ii+1; %time steps
+        CurStep = Step(ii);
         %The function 'Dissolve_Rock' is used here to calculate the rock
         %current matrix, Chunck_Events and Mechanical_Dissolution for each time
         %step.
         [ Current_Rock_Matrix,CurrentChunck_Events,...
-        CurrentMechanical_Dissolution]=...
+        CurrentMechanical_Dissolution, CurrentChemical_Dissolution]=...
         Dissolve_Rock(Previous_Rock_Matrix,BboxMatrix);
         Chunck_Events(ii)= length(CurrentChunck_Events); %updating chuck events
         for i = 1:Chunck_Events(ii)
+            CurStep.ChunckEvents(length(CurStep.ChunckEvents) + 1) = ChunckEvent(CurrentChunck_Events(i));
             Chunck_Area = CurrentChunck_Events(i).Area;
             Chunk_Width = CurrentChunck_Events(i).MajorAxisLength;
             Chunk_Height = CurrentChunck_Events(i).MinorAxisLength;
@@ -98,14 +109,18 @@ function [ Total_Time_Steps,...
             Chunck_Areas = [Chunck_Areas Chunck_Area];
             Chunck_Dimensions = [Chunck_Dimensions Chunck_Dimension];
         end
-        Mechanical_Dissolution(ii)=CurrentMechanical_Dissolution; ...
+        Mechanical_Dissolution(ii)=CurrentMechanical_Dissolution;
+        CurStep.Mechanical_Dissolution = CurrentMechanical_Dissolution;
+        CurStep.Chemical_Dissolution = CurrentChemical_Dissolution;
         %updating chunck area
         if (mod(ii,16) == 0)
             Rock_Frames(floor(ii/16))=im2frame(label2rgb(Current_Rock_Matrix)); %saving as frame
         end
         Previous_Rock_Matrix = Current_Rock_Matrix;
+        %% ModelData Update
+        Data.Steps(length(Data.Steps) + 1) = CurStep;
     end
-
+    Data.EndTime = clock;
     %% Calculating Mechanical Dissolution percentage 
     Total_Time_Steps = ii;
     %We divide the total mechnical dissolution pixels inside the bounding box
