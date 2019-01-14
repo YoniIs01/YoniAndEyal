@@ -1,4 +1,4 @@
-function[ Rock_Matrix , Rock_Image, Height, Width]=...
+function[ Rock_Matrix, Height, Width]=...
         Create_Rock_As_Table(Num_Of_Grains_In_Row)
 %This Function recieves the Rock's Dolomite percentages (Out of 100% 
 %Carbonatic Rock) and the Rock's grain size (Described as amount of grains
@@ -46,8 +46,6 @@ Rock_Matrix(Calc==CC.NumObjects-2)=100;%calcite-calcite boundary
 Rock_Matrix(Rock_Matrix==0)=55;
 %difining a different color to each 
 %kind of mineral and to the boundaries between minerals
-
-Rock_Image=label2rgb(Rock_Matrix);%assigning the labels to an image
 Rock_Matrix=double(Rock_Matrix);%turn Rock_Matrix from labels to double
 %% Find width and height of largest grain
 %  bb =regionprops(Rock_BW_Image,'BoundingBox');%find bounding boxes of grains

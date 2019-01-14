@@ -1,4 +1,4 @@
-function [ Current_Rock_Matrix, Chunck_Events, Mechanical_Dissolution, Chemical_Dissolution ] ...
+function [ Current_Rock_Matrix, Chunck_Events, Mechanical_Dissolution, Chemical_Dissolution, SolutionContactLinearIndex ] ...
     = Dissolve_Rock(Previous_Rock_Matrix, bbox)
 %The function recieves the matrix of the rock in it's previous disolution 
 %step and the bounding box in which the calculations are not effected from
@@ -38,7 +38,11 @@ Dissolved_Neighbours(2:end - 1,2:end - 1) =...
                         SolutionIndexes(3:end,3:end);
 %Dissolved_Neighbours2(Zeros_Mat) = 0;
 %% Calculating the current Rock state matrix after chemical dissolution
-ExposedIndexes = Dissolved_Neighbours~=0;
+ExposedIndexes = (Dissolved_Neighbours~=0);
+t = ExposedIndexes.*(Previous_Rock_Matrix ~= 0);
+SurfaceIndexes = (t~=0) & (t~=8);
+SolutionContactLinearIndex = find(SurfaceIndexes);
+%imshow(SurfaceIndexes);
 Probability_Matrix = zeros(size(ExposedIndexes));
 Probability_Matrix(ExposedIndexes) = rand(sum(sum(ExposedIndexes)),1).*100;
 WhoStays_Matrix = Previous_Rock_Matrix.*Dissolved_Neighbours.*0.125<=Probability_Matrix;
@@ -57,7 +61,7 @@ CC=bwconncomp(Check_Chunck); %calculating the connected components (chunks)
 Chunck_Events=[]; %%default if there is no Mechanical dissolution
 Mechanical_Dissolution=0; %default if there is no Mechanical dissolution
 
-Chemical_Dissolution = sum(sum((Previous_Rock_Matrix~=0) - WhoStays_Matrix==(Previous_Rock_Matrix~=0)));
+Chemical_Dissolution = sum(sum(((Previous_Rock_Matrix~=0) - WhoStays_Matrix==(Previous_Rock_Matrix~=0)).*bbox));
 Mechanical_Dissolution_Matrix=zeros(size(Current_Rock_Matrix));
 %creating a new  matrix to insert into it places where mechanical
 %dissolution occured
