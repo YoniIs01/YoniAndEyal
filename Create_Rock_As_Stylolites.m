@@ -1,7 +1,8 @@
 function[ Rock_Matrix, Height, Width]=...
         Create_Rock_As_Stylolites()
     %% Importing Image
-    Rock_Gray_Image = rgb2gray(imread('StyloCut.png'));
+    Rock_Gray_Image = rgb2gray(imread('stylres.tif'));%'StyloCut.png'
+    Rock_Gray_Image = imresize(Rock_Gray_Image, [720, 1280]);
     Rock_Gray_Image  = Rock_Gray_Image(:,1:1280,:);
     Rock_BW_Image = im2bw(Rock_Gray_Image,0.7);
     %% 
