@@ -1,7 +1,23 @@
 function[ Rock_Matrix, Height, Width]=...
-        Create_Rock_As_Stylolites()
+        Create_Rock_As_Stylolites(NumGrains, Orientation)
+    % NumGrains from 1 to 5
+    % Orientation 1 or 2
     %% Importing Image
     Rock_Gray_Image = rgb2gray(imread('stylres.tif'));%'StyloCut.png'
+    if (Orientation == 2)
+        Rock_Gray_Image = Rock_Gray_Image';
+    end
+    [OrigstylresWidth,OrigstylresHeight] = size(Rock_Gray_Image);
+    
+    % Changing Grain Number
+    stylresWidth  = ceil(OrigstylresWidth - OrigstylresWidth*((5 - NumGrains)/10));
+    stylresHeight  = ceil(OrigstylresHeight - OrigstylresHeight*((5 - NumGrains)/10));
+    
+    % Create Random Crop
+    WidthRandMove = ceil(rand()*(OrigstylresWidth - stylresWidth));
+    HeightRandMove = ceil(rand()*(OrigstylresHeight - stylresHeight));
+    Rock_Gray_Image = Rock_Gray_Image(1 + WidthRandMove:stylresWidth + WidthRandMove,1 + HeightRandMove:stylresHeight + HeightRandMove);
+    
     Rock_Gray_Image = imresize(Rock_Gray_Image, [720, 1280]);
     Rock_Gray_Image  = Rock_Gray_Image(:,1:1280,:);
     Rock_BW_Image = im2bw(Rock_Gray_Image,0.7);

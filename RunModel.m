@@ -1,4 +1,4 @@
-function Data = RunModel( RockType, NumGrains, DoloRatio, IsSmallSize)
+function Data = RunModel( RockType, NumGrains, DoloRatio, Orientation, IsSmallSize)
 %RUNMODEL Summary of this function goes here
 %   RockType - 1 for voronoi, 2 for table, 3 for brickwall, 4 for Stylolites
 %   IsSmallSize - 1 for small size mode
@@ -11,10 +11,7 @@ function Data = RunModel( RockType, NumGrains, DoloRatio, IsSmallSize)
     %% ModelData init
     Data = ModelData(RockType, NumGrains, DoloRatio);
     %% Validating rock parameters 
-    if (RockType ~= 1)
-        DoloRatio = 0;
-    end
-    if (NumGrains<100||NumGrains>10000||DoloRatio<0||DoloRatio>1)
+    if (NumGrains<1||NumGrains>10000||DoloRatio<0||DoloRatio>1)
      %Checks if the input is valid and breaks in case it is not.  
        disp('Wrong input parameters. please restart program!'); 
        return;
@@ -34,15 +31,16 @@ function Data = RunModel( RockType, NumGrains, DoloRatio, IsSmallSize)
     % Create_Rock_As_Table
     elseif (RockType == 2)
     [Previous_Rock_Matrix,Height_Threshold,Width_Threshold]...
-          =Create_Rock_As_Table(floor(sqrt(NumGrains)));
+          =Create_Rock_As_Table(floor(sqrt(NumGrains)),DoloRatio);
     % Create_Rock_As_Brickwall
     elseif (RockType == 3)
     [Previous_Rock_Matrix,Height_Threshold,Width_Threshold]...
-          =Create_Rock_As_Brickwall(floor(sqrt(NumGrains)));
+          =Create_Rock_As_Brickwall(floor(sqrt(NumGrains)),DoloRatio);
     % Create_Rock_As_Stylolites
     elseif (RockType == 4)
     [Previous_Rock_Matrix,Height_Threshold,Width_Threshold]...
-          =Create_Rock_As_Stylolites();
+          =Create_Rock_As_Stylolites(NumGrains, Orientation);
+          % NumGrains this is only from 1 to 5!
     end
     % For testing
     if (IsSmallSize == 1)
