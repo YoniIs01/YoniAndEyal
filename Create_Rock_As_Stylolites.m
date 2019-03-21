@@ -17,9 +17,7 @@ function[ Rock_Matrix, Height, Width]=...
     WidthRandMove = ceil(rand()*(OrigstylresWidth - stylresWidth));
     HeightRandMove = ceil(rand()*(OrigstylresHeight - stylresHeight));
     Rock_Gray_Image = Rock_Gray_Image(1 + WidthRandMove:stylresWidth + WidthRandMove,1 + HeightRandMove:stylresHeight + HeightRandMove);
-    
-    Rock_Gray_Image = imresize(Rock_Gray_Image, [720, 1280]);
-    Rock_Gray_Image  = Rock_Gray_Image(:,1:1280,:);
+    Rock_Gray_Image = imresize(Rock_Gray_Image, [420, 560]);
     Rock_BW_Image = im2bw(Rock_Gray_Image,0.7);
     %% 
     CC=bwconncomp(Rock_BW_Image); %finding coonected components in the rock 

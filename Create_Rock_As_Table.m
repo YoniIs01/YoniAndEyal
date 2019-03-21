@@ -13,6 +13,7 @@ plot(Line_X_Coordinates ,Line_Y_Coordinates,'black','LineWidth',0.2);
 plot(Line_Y_Coordinates, Line_X_Coordinates,'black','LineWidth',0.2); 
 % lines that represents boundaries between grains
 %% Focusing the diagram on relevant coordinates and Cropping the axis 
+set(gcf, 'Position', [0 0 560 420]);
 set(gca, 'Position', [0 0 1 1]); %corresponding to the Rock's Coordinates
 axis off;
 % xlim([0 1]);

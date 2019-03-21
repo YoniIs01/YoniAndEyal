@@ -11,8 +11,7 @@ FolderPath = 'D:\Program Files\Results Archive\';
 DoloRatio = 0;
 RockType = 4;
 for Orientation = 1:2
-    for NumGrains = 1:5
-        for i =1:10
+    for NumGrains = 3:3
             Time = clock;
             Model_Data = RunModel(RockType, NumGrains, DoloRatio, Orientation, IsSmallSize);
             TimeStamp = Model_Data.TimeStamp;
@@ -39,12 +38,11 @@ for Orientation = 1:2
                 {TimeStamp,RockType,NumGrains,DoloRatio,Total_Time_Steps,...
                 Mechanical_Dissolution_percentage,Chemical_Dissolution_percentage,Mechanical_Dissolution_Events,...
                 WS_FileName}];
-        end
     end
 end
 %% Other
-GrainNums = [100 200 400 800 1600 3200];
-DoloRatios = [0:0.02:1];
+GrainNums = [100];
+DoloRatios = [0.5:0.5];
 for RockType = 1:3
     for GrainNumIndex = 1:length(GrainNums)
         NumGrains = GrainNums(GrainNumIndex);

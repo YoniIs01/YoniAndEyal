@@ -24,6 +24,7 @@ plot(Vor_x_index,Vor_y_index,'black','LineWidth',0.1); %plotting voronoi diagram
 xlim([min(Rock_x_Coordinates) max(Rock_x_Coordinates)])
 ylim([min(Rock_y_Coordinates) max(Rock_y_Coordinates)])
 axis off;
+set(gcf, 'Position', [0 0 560 420]);
 set(gca, 'Position', [0 0 1 1]); %corresponding to the Rock's Coordinates
 %% Turning the plot into a rgb image that represents the rock
 %This section takes the voronoi diagram and by first turning it to a gray

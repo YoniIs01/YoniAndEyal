@@ -24,6 +24,7 @@ xlim([0 1]);
 ylim([0 1]);
 %% Focusing the diagram on relevant coordinates and Cropping the axis 
 axis off;
+set(gcf, 'Position', [0 0 560 420]);
 set(gca, 'Position', [0 0 1 1]); %corresponding to the Rock's Coordinates
 %% Turning the plot into a rgb image that represents the rock
 %This section takes the voronoi diagram and by first turning it to a gray
