@@ -7,6 +7,16 @@ ExcelData = {};
 % FolderPath = strcat(DesktopPath,'\Results\');
 % mkdir(FolderPath);
 FolderPath = 'D:\Program Files\Results Archive\';
+%% write data to Excel
+Time = clock;
+TimeStamp = strcat(num2str(Time(1)),'-',num2str(Time(2)),'-',num2str(Time(3)),'_',num2str(Time(4)),'-',num2str(Time(5)));
+filename = strcat(FolderPath,TimeStamp,'ModelResults.xlsx');
+Titles = {'RunTime','RockType','NumGrains','DoloRatio','StepsCounter',...
+        'Mechanical_Dissolution_percentage','Chemical_Dissolution_percentage','Mechanical_Dissolution_Events','WS_FileName'};
+sheet = 1;
+col = 'A';
+rown = 1;
+xlswrite(filename,Titles,sheet,strcat(col,int2str(rown)));
 %% Stylolites
 DoloRatio = 0;
 RockType = 4;
@@ -35,10 +45,11 @@ for Orientation = 1:2
             %% Save Data
             WS_FileName = strcat(FolderPath,Model_Data.FileName);
             save(WS_FileName,'Model_Data','-v7.3');
-            ExcelData = [ExcelData;...
-                {TimeStamp,RockType,NumGrains,DoloRatio,Total_Time_Steps,...
+            rown = rown+1;
+            ExcelRow = {TimeStamp,RockType,NumGrains,DoloRatio,Total_Time_Steps,...
                 Mechanical_Dissolution_percentage,Chemical_Dissolution_percentage,Mechanical_Dissolution_Events,...
-                WS_FileName}];
+                WS_FileName};
+            xlswrite(filename,ExcelRow,sheet,strcat(col,int2str(rown)));
         end
     end
 end
@@ -72,20 +83,11 @@ for RockType = 1:3
             %% Save Data
             WS_FileName = strcat(FolderPath,Model_Data.FileName);
             save(WS_FileName,'Model_Data','-v7.3');
-            ExcelData = [ExcelData;...
-                {TimeStamp,RockType,NumGrains,DoloRatio,Total_Time_Steps,...
+            rown = rown+1;
+            ExcelRow = {TimeStamp,RockType,NumGrains,DoloRatio,Total_Time_Steps,...
                 Mechanical_Dissolution_percentage,Chemical_Dissolution_percentage,Mechanical_Dissolution_Events,...
-                WS_FileName}];
+                WS_FileName};
+            xlswrite(filename,ExcelRow,sheet,strcat(col,int2str(rown)));
         end
     end
 end
-
-%% write data to Excel
-Time = clock;
-TimeStamp = strcat(num2str(Time(1)),'-',num2str(Time(2)),'-',num2str(Time(3)),'_',num2str(Time(4)),'-',num2str(Time(5)));
-filename = strcat(FolderPath,TimeStamp,'ModelResults.xlsx');
-Titles = {'RunTime','RockType','NumGrains','DoloRatio','StepsCounter',...
-        'Mechanical_Dissolution_percentage','Chemical_Dissolution_percentage','Mechanical_Dissolution_Events','WS_FileName'};
-sheet = 1;
-xlRange = 'A1';
-xlswrite(filename,[Titles;ExcelData],sheet,xlRange);
