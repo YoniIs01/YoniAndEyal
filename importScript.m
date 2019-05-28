@@ -1,4 +1,4 @@
-Files = dir('D:\Program Files\Results Archive');
+Files = dir('D:\Google Drive\Documents\Research\Weathering model\New Runs 2019\results archive\Run 1');
 j = 1;
 FileNames = string.empty;
 for i = 1:length(Files)
@@ -8,7 +8,7 @@ for i = 1:length(Files)
     end
 end
 j = 1;
-for i = 1:length(FileNames )
+for i = 1:11%length(FileNames )
     if endsWith(FileNames(i),'.mat')
         load(FileNames(i));
         Models(j) = Model_Data;

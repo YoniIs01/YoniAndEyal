@@ -3,10 +3,12 @@ function[ Rock_Matrix, Height, Width]=...
     % NumGrains from 1 to 5
     % Orientation 1 or 2
     %% Importing Image
-    Rock_Gray_Image = rgb2gray(imread('stylres.tif'));%'StyloCut.png'
+    Rock_BW_Image = imread('canvas_4_v01_ccitt.tif');%'StyloCut.png'
+    Rock_BW_Image = imcrop(Rock_BW_Image,[1 1 size(Rock_BW_Image,2) - 2500 size(Rock_BW_Image,1) - 1500]);
     if (Orientation == 2)
-        Rock_Gray_Image = Rock_Gray_Image';
+        Rock_BW_Image = Rock_BW_Image';
     end
+    
     [OrigstylresWidth,OrigstylresHeight] = size(Rock_Gray_Image);
     
     % Changing Grain Number
