@@ -11,11 +11,11 @@ function Data = RunModel( RockType, NumGrains, DoloRatio, Orientation, IsSmallSi
     %% ModelData init
     Data = ModelData(RockType, NumGrains, DoloRatio);
     %% Validating rock parameters 
-    if (NumGrains<1||NumGrains>10000||DoloRatio<0||DoloRatio>1)
-     %Checks if the input is valid and breaks in case it is not.  
-       disp('Wrong input parameters. please restart program!'); 
-       return;
-    end 
+%     if (NumGrains<1||NumGrains>10000||DoloRatio<0||DoloRatio>1)
+%      %Checks if the input is valid and breaks in case it is not.  
+%        disp('Wrong input parameters. please restart program!'); 
+%        return;
+%     end 
     %% Initializing Parameters
     %In this section we initialize the cells that will hold the rock's
     %properties in each time step and initiate other variables.
@@ -38,9 +38,31 @@ function Data = RunModel( RockType, NumGrains, DoloRatio, Orientation, IsSmallSi
           =Create_Rock_As_Brickwall(floor(sqrt(NumGrains)),DoloRatio);
     % Create_Rock_As_Stylolites
     elseif (RockType == 4)
-    [Previous_Rock_Matrix,Height_Threshold,Width_Threshold]...
-          =Create_Rock_As_Stylolites(NumGrains, Orientation);
-          % NumGrains this is only from 1 to 5!
+        % NumGrains this is only from 1 to 10!
+        r = [2.0 2.10 5.0 13.0 14.0 16.0];
+        t = [2.0 3.0 6.0 13.0 13.10 16.0];
+        %r = [8.41 8.75 8.91 9.61 9.91 9.92 9.94 10.31 10.68 11.91];
+        %t = [8.35 8.67 8.84 9.48 9.81 9.87 9.88 10.21 10.61 11.84];
+        if (Orientation == 1)
+            FileName = strcat('r',replace(num2str(r(NumGrains)),'.',''),'%.tiff');
+        else
+            FileName = strcat('t',replace(num2str(t(NumGrains)),'.',''),'%.tiff');
+        end
+        [Previous_Rock_Matrix,Height_Threshold,Width_Threshold]...
+              =Create_Rock_As_Stylolites(FileName);
+    elseif (RockType == 5)
+        % Create_Rock_As_Hex
+        [Previous_Rock_Matrix,Height_Threshold,Width_Threshold]...
+              =Create_Rock_As_Hex(floor(sqrt(NumGrains)),DoloRatio);
+    elseif (RockType == 6)
+    % Create_Rock_As_Cracks, NumGrains 0 or 1
+        if (NumGrains)
+            FileName = 'HighDenseCracks.jpg';
+        else
+            FileName = 'LowDenseCracks.jpg';
+        end
+        [Previous_Rock_Matrix,Height_Threshold,Width_Threshold]...
+              =Create_Rock_As_Cracks(FileName);
     end
     % For testing
     if (IsSmallSize == 1)
