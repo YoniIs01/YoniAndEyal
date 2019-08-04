@@ -1,6 +1,7 @@
 function Data = RunModel( RockType, NumGrains, DoloRatio, Orientation, IsSmallSize)
 %RUNMODEL Summary of this function goes here
-%   RockType - 1 for voronoi, 2 for table, 3 for brickwall, 4 for Stylolites
+%   RockType - 1 for voronoi, 2 for table, 3 for brickwall, 4 for
+%   Stylolites 5 for hexagonals 6 for cracks
 %   IsSmallSize - 1 for small size mode
 %   DoloRatio - Case Rock Type is 1, Dolomite to Calcite ratio in the Rock is from 0 (all Calcite) to 1 (all Dolomite).
 %   NumGrains - The number of grains in the simulated rock. The larger the number of
@@ -10,6 +11,7 @@ function Data = RunModel( RockType, NumGrains, DoloRatio, Orientation, IsSmallSi
     addpath('./obj/');
     %% ModelData init
     Data = ModelData(RockType, NumGrains, DoloRatio);
+    Data.Orientation = Orientation;
     %% Validating rock parameters 
 %     if (NumGrains<1||NumGrains>10000||DoloRatio<0||DoloRatio>1)
 %      %Checks if the input is valid and breaks in case it is not.  
@@ -35,18 +37,16 @@ function Data = RunModel( RockType, NumGrains, DoloRatio, Orientation, IsSmallSi
     % Create_Rock_As_Brickwall
     elseif (RockType == 3)
     [Previous_Rock_Matrix,Height_Threshold,Width_Threshold]...
-          =Create_Rock_As_Brickwall(floor(sqrt(NumGrains)),DoloRatio);
+          =Create_Rock_As_Brickwall(floor(sqrt(NumGrains)),DoloRatio,str2double(Orientation));
     % Create_Rock_As_Stylolites
     elseif (RockType == 4)
-        % NumGrains this is only from 1 to 10!
-        r = [2.0 2.10 5.0 13.0 14.0 16.0];
-        t = [2.0 3.0 6.0 13.0 13.10 16.0];
-        %r = [8.41 8.75 8.91 9.61 9.91 9.92 9.94 10.31 10.68 11.91];
-        %t = [8.35 8.67 8.84 9.48 9.81 9.87 9.88 10.21 10.61 11.84];
-        if (Orientation == 1)
-            FileName = strcat('r',replace(num2str(r(NumGrains)),'.',''),'%.tiff');
+        % NumGrains this is only from 1 to 12!
+        r = [2 5 6 7.2 8.1 9 9.8 10.8 11.7 13 14 16];
+        t = [2 3 6 7.1 8 9.1 10 11 11.9 13 14.6 16];
+        if (strcmp(Orientation,'Horizontal'))
+            FileName = strcat('r',num2str(r(NumGrains)),'%.tiff');
         else
-            FileName = strcat('t',replace(num2str(t(NumGrains)),'.',''),'%.tiff');
+            FileName = strcat('t',num2str(t(NumGrains)),'%.tiff');
         end
         [Previous_Rock_Matrix,Height_Threshold,Width_Threshold]...
               =Create_Rock_As_Stylolites(FileName);
@@ -68,7 +68,6 @@ function Data = RunModel( RockType, NumGrains, DoloRatio, Orientation, IsSmallSi
     if (IsSmallSize == 1)
         Previous_Rock_Matrix = Previous_Rock_Matrix(200:600,200:600,:);
     end
-    Data.RockSize = size(Previous_Rock_Matrix);
     Data.RockFirstImage = Previous_Rock_Matrix;
 
     %% Initializing Rock dissolution (Time Step 1)

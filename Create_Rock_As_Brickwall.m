@@ -1,5 +1,5 @@
 function[ Rock_Matrix, Height, Width]=...
-        Create_Rock_As_Brickwall(Num_Of_Grains_In_Row, Dolomite_Percentage)
+        Create_Rock_As_Brickwall(Num_Of_Grains_In_Row, Dolomite_Percentage, Offset)
 %This Function recieves the Rock's Dolomite percentages (Out of 100% 
 %Carbonatic Rock) and the Rock's grain size (Described as amount of grains
 %inside the Rock's Matrix). The function returns a 2D image of the rock's 
@@ -12,11 +12,23 @@ Cood = 0:Brick_Width:1;
 figure('Visible','Off'); 
 hold on;
 plot(Line_Y_Coordinates, Line_X_Coordinates,'black','LineWidth',0.1);
-Brick_Offset_Divider = 2; % Default value
+if (~exist('Offset','var'))
+    Brick_Offset_Divider = 2; % Default value
+else 
+    Brick_Offset_Divider = Offset;
+end
 for i = 1:length(Cood)
+    
     Y_Coods = [i*Brick_Width (i-1)*Brick_Width]';
     Y_Coods = repmat(Y_Coods,1,length(Cood));
-    X_Coods_Offset = mod(i*Brick_Width/Brick_Offset_Divider,Brick_Width);
+    if (mod(i,2) == 0)
+%         Offset Is Cummulative with line
+%         X_Coods_Offset = mod(i*Brick_Width/Brick_Offset_Divider,Brick_Width);
+        X_Coods_Offset = mod(Brick_Width/Brick_Offset_Divider,Brick_Width);
+    else
+        X_Coods_Offset = 0;
+    end
+    
     plot(Line_X_Coordinates(1:2,:) + X_Coods_Offset,Y_Coods,'black','LineWidth',0.1); 
 end
 % lines that represents boundaries between grains
@@ -36,6 +48,14 @@ Rock_Frame = getframe(gcf);  %turns the plot into a struct
 [Rock_Temp_Image,~] = frame2im(Rock_Frame); %turns the struct into an image
 Rock_Gray_Image=rgb2gray(Rock_Temp_Image); %turns the image to grayscale 
 Rock_BW_Image = im2bw(Rock_Gray_Image,0.9);%turns image to BW
+
+h = ceil(560/Num_Of_Grains_In_Row);
+w = ceil(ceil(560/Num_Of_Grains_In_Row)*420/560);
+a = ones(w,h);
+a(:,h) = 0;
+a(w,:) = 0;
+x =repmat([repmat(a,1,Num_Of_Grains_In_Row);[a(:,floor(h*Offset)+1:end) repmat(a,1,Num_Of_Grains_In_Row-1) a(:,1:floor(h*Offset))]],Num_Of_Grains_In_Row/2,1);
+Rock_BW_Image = x;
 %0.9 is the gray threshhold, designed to make a bold and significant
 %border between grains
 % Rock_BW_Image=im2bw(frame2im(getframe(gcf)),0.9);

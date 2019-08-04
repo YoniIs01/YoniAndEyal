@@ -16,7 +16,7 @@ function[ Rock_Matrix, Height, Width]=...
     Rock_Matrix(Rock_Matrix==(round(CC.NumObjects/2)))=10; % Calcite
     %Rock_Matrix(Rock_Matrix==0)=100; %Grain boundary
     Rock_Matrix(Calc==CC.NumObjects-2)=100;%calcite-calcite boundary
-    Rock_Matrix(Rock_Matrix==0)=55;
+    Rock_Matrix(Rock_Matrix==0)=100;
     %difining a different color to each 
     %kind of mineral and to the boundaries between minerals
     Rock_Matrix=double(Rock_Matrix);%turn Rock_Matrix from labels to double

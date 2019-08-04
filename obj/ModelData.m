@@ -3,7 +3,7 @@ properties
     RockType
     NumGrains
     DoloPercent
-    RockSize
+    Orientation
     RockFirstImage
     StartTime
     EndTime
@@ -11,45 +11,64 @@ properties
 end
 properties (Dependent)
     FileName
+    FilePath
+    RockImageFile
+    RockSize
     StepIds
     TimeStamp
     TotalTimeSteps
     TotalDissolution
     MechanicalDissolutionPercent
     ChemicalDissolutionPercent
-    SolutionOutOfBBoxIndex
+    SolutionOutOfBBoxStepId
+    SolutionContactStabilizedStepId
     MeanChunckSize
 end
 properties (Constant)
-    ModelDataExcelPath = "D:\Program Files\Results Archive\complete run 2\2019-6-3_10-9ModelResults.xlsx";
-    RockTypes = struct('Voronoi',1,'Table',2,'Brickwall',3,'Stylolites',4,'Hex',5,'Cracks',6)
+    ModelDataPath = "D:\Program Files\Results Archive\FinalResults\";
+    ModelDataExcelPath = "D:\Program Files\Results Archive\FinalResults\FinalModelResults.xlsx";
+    RockTypes = struct('Voronoi',1,'Table',2,'Brickwall',3,'Stylolites',4,'Hex',5,'Cracks',6);
+    RockIds = ["Voronoi" "Table" "Brickwall" "Stylolites" "Hex" "Cracks"];
 end
 
 methods (Static)
-    function PathList = QueryModelDataPath(QueryString)
+    function RefinedData = QueryExcel(QueryString)
         [ndata, text, alldata] = xlsread(ModelData.ModelDataExcelPath);
         Columns = text(1,:);
-        PathColumn = find(strcmp(Columns,'WS_FileName'));
         NameValues = strsplit(QueryString,';');
-        RefinedIndexes  = [];
+        if isempty(QueryString)
+            NameValues = [];
+        end
+        RefinedIndexes  = [2:size(alldata,1)];
         for i = 1:length(NameValues)
          NameValue = strsplit(NameValues{i},'=');
          Name = NameValue{1};
          Value = NameValue{2};
          if any(strcmp(Columns,Name))
             ColIndex = find(strcmp(Columns,Name));
-            RefinedIndexes = [RefinedIndexes find(ndata(:,ColIndex) == str2double(Value))];
+            if (strcmp(class(alldata{2,ColIndex}),'char'))
+                RefinedIndexes = intersect(RefinedIndexes,find(strcmp([alldata(:,ColIndex)], Value)));
+            else
+                RefinedIndexes = intersect(RefinedIndexes,find(abs([alldata{2:end,ColIndex}] - str2double(Value)) < 0.001) + 1);
+            end
          end
         end
-        PathList = text(RefinedIndexes,PathColumn);
+        RefinedData = alldata(RefinedIndexes,:);
     end
+    function PathList = QueryModelDataPath(QueryString)
+        [ndata, text, alldata] = xlsread(ModelData.ModelDataExcelPath);
+        Columns = text(1,:);
+        PathColumn = find(strcmp(Columns,'WS_FileName'));
+        RefinedData = ModelData.QueryExcel(QueryString);
+        PathList = RefinedData(:,PathColumn);
+    end  
     function PlotGrainDetachmentAverageProbality(QueryString)
         PathList = ModelData.QueryModelDataPath(QueryString);
         ModulesNumber =  length(PathList);
-        BinSize = 30;
+        BinSize = 100;
         ProbalityPerBin = [];
         for i =1:ModulesNumber
-            load(PathList{i});
+            load(strcat(ModelData.ModelDataPath,PathList{i}));
             M = Model_Data;
             e = [M.Steps.ChunckEvents];
             figure;
@@ -87,10 +106,21 @@ methods (Static)
         set(gca,'fontsize',18,'ycolor',[0 .5 .5]);
         xlabel('Detachment size [Pixels]','fontsize',18);
         ylabel('Detachment Probality','fontsize',18);
-%         yyaxis right
-%         bar(XBarValues(2:end),MinRepeats(2:end),1,'FaceColor','w','EdgeColor',[.5 .5 .5],'LineWidth',1.5);
-%         ylabel('#Steps to detachment','fontsize',18);
+        yyaxis right
+        bar(XBarValues(2:end),MinRepeats(2:end),1,'FaceColor','w','EdgeColor',[.5 .5 .5],'LineWidth',1.5);
+        ylabel('#Steps to detachment','fontsize',18);
     end
+    function Model_Data = Load(FileName)
+        load(strcat(ModelData.ModelDataPath,FileName),'Model_Data');
+    end  
+    function Model_Data = LoadFromQuery(QueryString,Index)
+        ModelList = ModelData.QueryModelDataPath(QueryString);
+        Model_Data = ModelData.Load(ModelList{Index});
+    end  
+%     function DeleteModel(DataFileName)
+%         filepath = strcat(ModelData.ModelDataPath,DataFileName);
+%         delete(filepath);
+%     end
 end
 
 methods
@@ -104,6 +134,44 @@ methods
     function value = get.FileName(this)
         value = strcat('ModelData_',strrep(this.TimeStamp,':',''),'.mat');
     end
+    function value = get.FilePath(this)
+        value = strcat(this.ModelDataPath,'ModelData_',strrep(this.TimeStamp,':',''),'.mat');
+    end
+    function value = get.RockImageFile(this)
+        switch (this.RockType)
+            case 4
+                switch (this.Orientation)
+                    case 'Horizontal'
+                        switch (this.NumGrains)
+                            case 1; value = 'r2%.tiff';
+                            case 2; value = 'r21%.tiff';
+                            case 3; value = 'r5%.tiff';
+                            case 4; value = 'r13%.tiff';
+                            case 5; value = 'r14%.tiff';
+                            case 6; value = 'r16%.tiff';
+                        end
+                    case 'Vertical'
+                        switch (this.NumGrains)
+                            case 1; value = 't2%.tiff';
+                            case 2; value = 't3%.tiff';
+                            case 3; value = 't6%.tiff';
+                            case 4; value = 't13%.tiff';
+                            case 5; value = 't131%.tiff';
+                            case 6; value = 't16%.tiff';
+                        end
+                end
+            case 6
+                switch this.NumGrains
+                    case 0; value = 'LowDenseCracks.jpg';
+                    case 1; value = 'HighDenseCracks.jpg';
+                end
+            otherwise
+                value = '';
+        end
+    end
+    function value = get.RockSize(this)
+        value = size(this.RockFirstImage);
+    end   
     function value = get.TotalTimeSteps(this)
         value = length(this.Steps);
     end
@@ -116,7 +184,7 @@ methods
     function value = get.ChemicalDissolutionPercent(this)
         value = sum([this.Steps.Chemical_Dissolution])/this.TotalDissolution;
     end
-    function value = get.SolutionOutOfBBoxIndex(this)
+    function value = get.SolutionOutOfBBoxStepId(this)
         S = zeros(this.RockSize);
         for i = 2:this.TotalTimeSteps
             S(this.Steps(i).SolutionContactLinearIndex) = 1;
@@ -127,6 +195,10 @@ methods
         end
         
         value = i;
+    end
+    function value = get.SolutionContactStabilizedStepId(this)
+        StabilizedContactArea = mean([this.Steps.SolutionContactArea]);%-std([this.Steps.SolutionContactArea]);
+        value = find([this.Steps.SolutionContactArea] > StabilizedContactArea,1);
     end
     function value = get.MeanChunckSize(this)
         e = [this.Steps.ChunckEvents];
@@ -141,6 +213,10 @@ methods
         this.StartTime = clock;
         this.Steps = Step.empty;
     end
+    function SaveWS(this)
+        Model_Data = this;
+        save(this.FilePath,'Model_Data','-v7.3');
+    end
 
     %         Methods
     function SolutionUnderBBox = GetSolutionUnderBBox(this)
@@ -152,7 +228,6 @@ methods
             SolutionUnderBBox(i) = sum(row > 291);
         end
     end
-    
     function SurfaceMatrix = GetSurfaceMatrixByStep(this,StepIndex)
         SurfaceMatrix = zeros(this.RockSize);
         SurfaceMatrix(this.Steps(StepIndex).SolutionContactLinearIndex) = 1;
@@ -182,6 +257,9 @@ methods
         %outside bounding box)
         Current_Rock_Matrix([Temp{:}])=0; %dissolving the chunks
         Rock_Matrixes{i+1} = Current_Rock_Matrix;
+    end
+    function ShowRockFirstFrame(this)
+        imshow(label2rgb(this.RockFirstImage));
     end
     function PlayMovie(this)
         Rock_Matrixes = this.GetRockMatrixesByStep();
