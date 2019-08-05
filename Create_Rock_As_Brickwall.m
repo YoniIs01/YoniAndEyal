@@ -52,8 +52,8 @@ Rock_BW_Image = im2bw(Rock_Gray_Image,0.9);%turns image to BW
 h = ceil(560/Num_Of_Grains_In_Row);
 w = ceil(ceil(560/Num_Of_Grains_In_Row)*420/560);
 a = ones(w,h);
-a(:,h) = 0;
-a(w,:) = 0;
+a(:,h-1:h) = 0;
+a(w-1:w,:) = 0;
 x =repmat([repmat(a,1,Num_Of_Grains_In_Row);[a(:,floor(h*Offset)+1:end) repmat(a,1,Num_Of_Grains_In_Row-1) a(:,1:floor(h*Offset))]],Num_Of_Grains_In_Row/2,1);
 Rock_BW_Image = x;
 %0.9 is the gray threshhold, designed to make a bold and significant
