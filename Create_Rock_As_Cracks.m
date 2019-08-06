@@ -28,4 +28,5 @@ function[ Rock_Matrix, Height, Width]=...
     %  Width=max(bbMatrix(:,4));%largest width
     Height=129;
     Width=109;
+    close all;
 end

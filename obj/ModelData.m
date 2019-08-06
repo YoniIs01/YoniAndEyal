@@ -22,6 +22,7 @@ properties (Dependent)
     ChemicalDissolutionPercent
     SolutionOutOfBBoxStepId
     SolutionContactStabilizedStepId
+    SolutionContactStabilizedLastStepId
     MeanChunckSize
 end
 properties (Constant)
@@ -32,6 +33,21 @@ properties (Constant)
 end
 
 methods (Static)
+    %        Query Models etc..
+    function PathList = QueryModelDataPath(QueryString)
+        [ndata, text, alldata] = xlsread(ModelData.ModelDataExcelPath);
+        Columns = text(1,:);
+        PathColumn = find(strcmp(Columns,'WS_FileName'));
+        RefinedData = ModelData.QueryExcel(QueryString);
+        PathList = RefinedData(:,PathColumn);
+    end  
+    function Model_Data = Load(FileName)
+        load(strcat(ModelData.ModelDataPath,FileName),'Model_Data');
+    end  
+    function Model_Data = LoadFromQuery(QueryString,Index)
+        ModelList = ModelData.QueryModelDataPath(QueryString);
+        Model_Data = ModelData.Load(ModelList{Index});
+    end  
     function RefinedData = QueryExcel(QueryString)
         [ndata, text, alldata] = xlsread(ModelData.ModelDataExcelPath);
         Columns = text(1,:);
@@ -42,12 +58,22 @@ methods (Static)
         RefinedIndexes  = [2:size(alldata,1)];
         for i = 1:length(NameValues)
          NameValue = strsplit(NameValues{i},'=');
+         Operator = '=';
+         if length(NameValue) ~= 2
+             NameValue = strsplit(NameValues{i},'~');
+             Operator = '~';
+         end
          Name = NameValue{1};
          Value = NameValue{2};
          if any(strcmp(Columns,Name))
             ColIndex = find(strcmp(Columns,Name));
             if (strcmp(class(alldata{2,ColIndex}),'char'))
-                RefinedIndexes = intersect(RefinedIndexes,find(strcmp([alldata(:,ColIndex)], Value)));
+                if (Operator == '=')
+                    RefinedIndexes = intersect(RefinedIndexes,find(strcmp([alldata(:,ColIndex)], Value)));
+                else
+                    RefinedIndexes = intersect(RefinedIndexes,find(~strcmp([alldata(:,ColIndex)], Value)));
+                end
+                
             else
                 RefinedIndexes = intersect(RefinedIndexes,find(abs([alldata{2:end,ColIndex}] - str2double(Value)) < 0.001) + 1);
             end
@@ -55,13 +81,8 @@ methods (Static)
         end
         RefinedData = alldata(RefinedIndexes,:);
     end
-    function PathList = QueryModelDataPath(QueryString)
-        [ndata, text, alldata] = xlsread(ModelData.ModelDataExcelPath);
-        Columns = text(1,:);
-        PathColumn = find(strcmp(Columns,'WS_FileName'));
-        RefinedData = ModelData.QueryExcel(QueryString);
-        PathList = RefinedData(:,PathColumn);
-    end  
+    
+    %        StaticCalcMethods
     function PlotGrainDetachmentAverageProbality(QueryString)
         PathList = ModelData.QueryModelDataPath(QueryString);
         ModulesNumber =  length(PathList);
@@ -110,21 +131,10 @@ methods (Static)
         bar(XBarValues(2:end),MinRepeats(2:end),1,'FaceColor','w','EdgeColor',[.5 .5 .5],'LineWidth',1.5);
         ylabel('#Steps to detachment','fontsize',18);
     end
-    function Model_Data = Load(FileName)
-        load(strcat(ModelData.ModelDataPath,FileName),'Model_Data');
-    end  
-    function Model_Data = LoadFromQuery(QueryString,Index)
-        ModelList = ModelData.QueryModelDataPath(QueryString);
-        Model_Data = ModelData.Load(ModelList{Index});
-    end  
-%     function DeleteModel(DataFileName)
-%         filepath = strcat(ModelData.ModelDataPath,DataFileName);
-%         delete(filepath);
-%     end
 end
 
 methods
-    %         Dependent Properties get functions
+%%         Dependent Properties get functions
     function value = get.TimeStamp(this)
         value = strcat(num2str(this.StartTime(1)),'-',num2str(this.StartTime(2)),'-',num2str(this.StartTime(3)),'_',num2str(this.StartTime(4)),':',num2str(this.StartTime(5)),':',num2str(this.StartTime(6)));
     end
@@ -197,15 +207,19 @@ methods
         value = i;
     end
     function value = get.SolutionContactStabilizedStepId(this)
-        StabilizedContactArea = mean([this.Steps.SolutionContactArea]);%-std([this.Steps.SolutionContactArea]);
+        StabilizedContactArea = mean([this.Steps.SolutionContactArea])-std([this.Steps.SolutionContactArea]);
         value = find([this.Steps.SolutionContactArea] > StabilizedContactArea,1);
+    end
+    function value = get.SolutionContactStabilizedLastStepId(this)
+        StabilizedContactArea = mean([this.Steps.SolutionContactArea])-std([this.Steps.SolutionContactArea]);
+        value = find([this.Steps.SolutionContactArea] > StabilizedContactArea,1,'last');
     end
     function value = get.MeanChunckSize(this)
         e = [this.Steps.ChunckEvents];
         a = [e.Area];
         value = mean(a);
     end
-    %         Constructor
+%%         Constructor
     function this=ModelData(RockType,NumGrains,DoloPercent)
         this.RockType = RockType;
         this.NumGrains = NumGrains;
@@ -218,19 +232,10 @@ methods
         save(this.FilePath,'Model_Data','-v7.3');
     end
 
-    %         Methods
-    function SolutionUnderBBox = GetSolutionUnderBBox(this)
-        S = zeros(this.RockSize);
-        SolutionUnderBBox(1) = 0;
-        for i = 2:this.TotalTimeSteps
-            S(this.Steps(i).SolutionContactLinearIndex) = 1;
-            [row col] = find(S);
-            SolutionUnderBBox(i) = sum(row > 291);
-        end
-    end
-    function SurfaceMatrix = GetSurfaceMatrixByStep(this,StepIndex)
-        SurfaceMatrix = zeros(this.RockSize);
-        SurfaceMatrix(this.Steps(StepIndex).SolutionContactLinearIndex) = 1;
+%%         Methods
+    %         Visual 
+    function ShowRockFirstFrame(this)
+        imshow(label2rgb(this.RockFirstImage(1:420-129,109:560-109,:)));
     end
     function Rock_Matrixes = GetRockMatrixesByStep(this)
         Rock_Matrixes = {};
@@ -258,8 +263,9 @@ methods
         Current_Rock_Matrix([Temp{:}])=0; %dissolving the chunks
         Rock_Matrixes{i+1} = Current_Rock_Matrix;
     end
-    function ShowRockFirstFrame(this)
-        imshow(label2rgb(this.RockFirstImage));
+    function SurfaceMatrix = GetSurfaceMatrixByStep(this,StepIndex)
+        SurfaceMatrix = zeros(this.RockSize);
+        SurfaceMatrix(this.Steps(StepIndex).SolutionContactLinearIndex) = 1;
     end
     function PlayMovie(this)
         Rock_Matrixes = this.GetRockMatrixesByStep();
@@ -290,7 +296,7 @@ methods
         end
         implay(Rock_Frames);
     end
-    function PlayCombinedMovie(this, SaveToDir)
+    function PlayCombinedMovie(this)
         Rock_Matrixes = this.GetRockMatrixesByStep();
         j = 1;
         for i=1:length(this.Steps)
@@ -305,13 +311,19 @@ methods
         RGB_SurfaceMatrix = label2rgb(zeros(size(this.GetSurfaceMatrixByStep(i))));
         Rock_Frames(j) = im2frame([RGB_Current_Rock_Matrix(1:420-129,109:560-109,:) RGB_SurfaceMatrix(1:420-129,109:560-109,:)]);
         implay(Rock_Frames);
-%         if (SaveToDir)
-%             v = VideoWriter(strcat(SaveToDir,this.FileName),'MPEG-4');
-%             open(v);
-%             writeVideo(v,Rock_Frames);
-%             close(v);
-%         end
     end
+    
+    function SolutionUnderBBox = GetSolutionUnderBBox(this)
+        S = zeros(this.RockSize);
+        SolutionUnderBBox(1) = 0;
+        for i = 2:this.TotalTimeSteps
+            S(this.Steps(i).SolutionContactLinearIndex) = 1;
+            [row col] = find(S);
+            SolutionUnderBBox(i) = sum(row > 291);
+        end
+    end
+    
+    %         Plots
     function PlotChunckSizeHistogram(this,threshold,binsize)
         if nargin<2
             threshold =30;
@@ -348,7 +360,7 @@ methods
         ylabel('Weathering (pixels)')
         hold off;
     end
-    function PlotFFT(this)
+    function PlotContactAreaFFT(this)
         %making sure there are no gaps, and forcing an evenly sampled data
         newTimeSteps=linspace(min(this.StepIds),max(this.StepIds),100*length(this.StepIds));
         newContactArea=interp1(this.StepIds,[this.Steps.SolutionContactArea],newTimeSteps,'pchip');
@@ -368,25 +380,31 @@ methods
         %title('Spectral analysis using fft','fontsize',18);
         xlim([0,.1])
     end
-    function PlotDissolutionFFT(this)
-        %making sure there are no gaps, and forcing an evenly sampled data
-        newTimeSteps=linspace(min(this.StepIds),max(this.StepIds),100*length(this.StepIds));
-        newContactArea=interp1(this.StepIds,[this.Steps.TotalDissolution],newTimeSteps,'pchip');
-        %% calculationg the fft
-        Y=fft(newContactArea(newContactArea>mean(newContactArea)));
-        %using the squared magnitude to get rid of low signals
-        SquaredMag=(2.*(abs(Y(2:length(Y)/2)).^2))./((length(Y)/2)^2);
-        %calculating the frequency
-        dage=newTimeSteps(2)-newTimeSteps(1);
-        f=(2:(length(Y)/2))./(length(Y)*dage);
-        [pk_1,f0_1] = findpeaks(SquaredMag,f,'SortStr','descend','NPeaks',5);
+    function Peaks = PlotMechanicalDissolutionFFT(this)
+        %% Calculates Mechanical Dissolution FFT and returns Most Significant Peaks (2STD above Mean) and STD  
+        % calculationg the fft
+        md = [this.Steps.Mechanical_Dissolution];
+        mdc = zeros(size(md));
+%         for i = 1:length(md)
+%             mdc(i) = sum(md==md(i));
+%         end
+%         md(mdc == 1) = 0;
+        Y=fft(md);
+        PosY = 2*Y(2:length(Y)/2)/length(Y);
+        dt=1;
+        f=(2:(length(Y)/2))./(length(Y)*dt);
+        
+        Magnitude = abs(PosY);
+        [peaks,frequencies] = findpeaks(Magnitude,f,'SortStr','descend');
+        HighPeakIndexes = (peaks > mean(peaks) + 3*std(peaks));
+        TopPeaks = peaks(HighPeakIndexes)';
+        TopFrequencies = frequencies(HighPeakIndexes)';
         figure;
-        plot(f,SquaredMag,'k',f0_1,pk_1,'or');
-        text(f0_1,pk_1,num2str(round(1./f0_1(:))));
+        plot(f,Magnitude,'k',TopFrequencies,TopPeaks,'or');
+        text(TopFrequencies,TopPeaks,num2str(round(1./TopFrequencies)));
         xlabel('Frequency'); ylabel('2|Xn|^2/n^2 , 2|Xn|/n');
         title('Spectral analysis using fft');
-        xlim([0,.1])
-
+        Peaks = [1./TopFrequencies TopPeaks (TopPeaks - mean(peaks))/std(peaks)];
     end
 end
 end

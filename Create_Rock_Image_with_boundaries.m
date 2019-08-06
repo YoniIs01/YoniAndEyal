@@ -75,6 +75,5 @@ Rock_Matrix=double(Rock_Matrix);%turn Rock_Matrix from labels to double
 %  Width=max(bbMatrix(:,4));%largest width
 Height=129;
 Width=109;
-figure;
-imshow(label2rgb(Rock_Matrix))
+close all;
 end
