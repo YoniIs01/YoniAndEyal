@@ -75,7 +75,12 @@ methods (Static)
                 end
                 
             else
-                RefinedIndexes = intersect(RefinedIndexes,find(abs([alldata{2:end,ColIndex}] - str2double(Value)) < 0.001) + 1);
+                if (Operator == '=')
+                    RefinedIndexes = intersect(RefinedIndexes,find(abs([alldata{2:end,ColIndex}] - str2double(Value)) < 0.001) + 1);
+                else
+                    RefinedIndexes = intersect(RefinedIndexes,find(abs([alldata{2:end,ColIndex}] - str2double(Value)) > 0.001) + 1);
+                end
+                
             end
          end
         end
@@ -337,6 +342,7 @@ methods
         ylabel('Frequency','fontsize',18)
         hold off;
     end
+    
     function PlotCumDissolutionByTimeStep(this)
         figure;
         hold on;
@@ -384,27 +390,36 @@ methods
         %% Calculates Mechanical Dissolution FFT and returns Most Significant Peaks (2STD above Mean) and STD  
         % calculationg the fft
         md = [this.Steps.Mechanical_Dissolution];
+        ids = arrayfun(@(s) (sum([s.ChunckEvents.Area] > 10) == 0),this.Steps);
+        md(ids) = 0;
         mdc = zeros(size(md));
 %         for i = 1:length(md)
 %             mdc(i) = sum(md==md(i));
 %         end
 %         md(mdc == 1) = 0;
         Y=fft(md);
-        PosY = 2*Y(2:length(Y)/2)/length(Y);
+        PosY = 2*Y(2:floor(length(Y)/2))/length(Y);
         dt=1;
         f=(2:(length(Y)/2))./(length(Y)*dt);
         
         Magnitude = abs(PosY);
         [peaks,frequencies] = findpeaks(Magnitude,f,'SortStr','descend');
-        HighPeakIndexes = (peaks > mean(peaks) + 3*std(peaks));
+        Threshold = mean(peaks) + 1*std(peaks);
+        HighPeakIndexes = (peaks > Threshold);
         TopPeaks = peaks(HighPeakIndexes)';
         TopFrequencies = frequencies(HighPeakIndexes)';
-        figure;
-        plot(f,Magnitude,'k',TopFrequencies,TopPeaks,'or');
-        text(TopFrequencies,TopPeaks,num2str(round(1./TopFrequencies)));
-        xlabel('Frequency'); ylabel('2|Xn|^2/n^2 , 2|Xn|/n');
-        title('Spectral analysis using fft');
-        Peaks = [1./TopFrequencies TopPeaks (TopPeaks - mean(peaks))/std(peaks)];
+        TopPeaks = TopPeaks (1./TopFrequencies > 5);
+        TopFrequencies = TopFrequencies (1./TopFrequencies > 5);
+%         figure;
+%         plot(f,Magnitude,'k',TopFrequencies,TopPeaks,'or');
+%         text(TopFrequencies,TopPeaks,num2str(round(1./TopFrequencies)));
+%         xlabel('Frequency'); ylabel('2|Xn|^2/n^2 , 2|Xn|/n');
+%         title('Spectral analysis using fft');
+        if (length(TopFrequencies) == 0) 
+            Peaks = [];
+        else
+            Peaks = sortrows([1./TopFrequencies TopPeaks (TopPeaks - mean(peaks))/std(peaks)],1,'descend');
+        end
     end
 end
 end

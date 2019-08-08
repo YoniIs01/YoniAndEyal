@@ -10,7 +10,7 @@ STEPS_COLNAMES = {'modelId', 'stepId', 'Mechanical_Dissolution', 'Chemical_Disso
 CHUNCK_EVENTS_TABLE_NAME = 'chunkevents';
 CHUNCK_EVENTS_COLNAMES = {'modelId','Stepid','Area','Width','Height'};
 MODELS_INFO_TABLE_NAME = 'models_info';
-MODELS_INFO_COLNAMES = {'modelid','SolutionContactStabilizedStepId','SolutionOutOfBBoxStepId'};
+MODELS_INFO_COLNAMES = {'modelid','SolutionContactStabilizedStepId','SolutionOutOfBBoxStepId','SolutionContactStabilizedLastStepId'};
 
 
 %% Models Tables Insert
@@ -66,7 +66,8 @@ end
 %% Writing Data to modelsinfo
     modelsinfo_values = {model_id,...
                          model_data.SolutionContactStabilizedStepId,...
-                         model_data.SolutionOutOfBBoxStepId};
+                         model_data.SolutionOutOfBBoxStepId,...
+                         model_data.SolutionContactStabilizedLastStepId};
     data = cell2table(modelsinfo_values,'VariableNames',MODELS_INFO_COLNAMES);
     sqlwrite(conn,MODELS_INFO_TABLE_NAME,data);
 end

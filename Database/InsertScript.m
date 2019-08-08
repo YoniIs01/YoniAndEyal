@@ -6,8 +6,9 @@ javaaddpath([matlabroot,'\java\jarext\mysql-connector-java-5.1.48-bin.jar'])
 conn= database('rockmodeling','Yoni','Yoni','com.mysql.jdbc.Driver','jdbc:mysql://localhost:3306/');
 if (isempty(conn.Message)) %Connection Succesfull
     %Query Model
-    for i=1:33
-        m = ModelData.LoadFromQuery(strcat('RockType=5;Orientation~None'),i);
+    n = length(ModelData.QueryModelDataPath('RockType~1'));
+    parfor i=174:n
+        m = ModelData.LoadFromQuery(strcat('RockType~1'),i);
         % insert into Database
         model_id = InsertModelData(conn,m);
         disp(model_id);

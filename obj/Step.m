@@ -8,6 +8,7 @@ classdef Step
     end
     properties (Dependent)
         EventsNumber
+        BigEventsNumber
         TotalDissolution
         SolutionContactArea
         MaxChunkSize
@@ -16,6 +17,15 @@ classdef Step
         function value = get.EventsNumber(this)
             value = length(this.ChunckEvents);
         end
+        function value = get.BigEventsNumber(this)
+            e = this.ChunckEvents;
+            if isempty(e)
+                value = 0;
+            else
+                value = length(e([e.Area]>10));
+            end
+        end
+        
         function value = get.TotalDissolution(this)
             value = this.Chemical_Dissolution + this.Mechanical_Dissolution;
         end
