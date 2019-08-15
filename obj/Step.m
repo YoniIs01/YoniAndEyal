@@ -40,7 +40,7 @@ classdef Step
             end
         end
         
-        function this=Step(StepId)
+        function this=Step(StepId) %constructor
             this.StepId = StepId;
             this.ChunckEvents = ChunckEvent.empty;
         end

@@ -28,27 +28,33 @@ end
 properties (Constant)
     ModelDataPath = "D:\Program Files\Results Archive\FinalResults\";
     ModelDataExcelPath = "D:\Program Files\Results Archive\FinalResults\FinalModelResults.xlsx";
-    RockTypes = struct('Voronoi',1,'Table',2,'Brickwall',3,'Stylolites',4,'Hex',5,'Cracks',6);
-    RockIds = ["Voronoi" "Table" "Brickwall" "Stylolites" "Hex" "Cracks"];
+    RockTypes = struct('Voronoi',1,'Table',2,'Brickwall',3,'Stylolites',4,'Hex',5,'Cracks',6,'Simon',7);
+    RockIds = ["Voronoi" "Table" "Brickwall" "Stylolites" "Hex" "Cracks" "Simon"];
 end
 
 methods (Static)
     %        Query Models etc..
-    function PathList = QueryModelDataPath(QueryString)
+    function PathList = QueryModelDataPath(QueryString) % returns the list of filenames of relevant model datas
         [ndata, text, alldata] = xlsread(ModelData.ModelDataExcelPath);
         Columns = text(1,:);
         PathColumn = find(strcmp(Columns,'WS_FileName'));
         RefinedData = ModelData.QueryExcel(QueryString);
         PathList = RefinedData(:,PathColumn);
     end  
-    function Model_Data = Load(FileName)
+    function Model_Data = Load(FileName) %loads a single model simulation data
         load(strcat(ModelData.ModelDataPath,FileName),'Model_Data');
     end  
-    function Model_Data = LoadFromQuery(QueryString,Index)
+    function Model_Data = LoadFromQuery(QueryString,Index)% Loads the relevant model datas
+%         EXAMPLE:
+%         for i=1:length(ModelData.QueryModelDataPath('RockType=3'))
+%           m = ModelData.LoadFromQuery('RockType=3',i)
+%         end
         ModelList = ModelData.QueryModelDataPath(QueryString);
         Model_Data = ModelData.Load(ModelList{Index});
     end  
-    function RefinedData = QueryExcel(QueryString)
+    function RefinedData = QueryExcel(QueryString) %recieves a ; delimited query, with excel column headers and values
+        % returns the relevant rows in excel
+        % EXAMPLE: 'RockType=3;NumGrains=800;Orientation~0.5'
         [ndata, text, alldata] = xlsread(ModelData.ModelDataExcelPath);
         Columns = text(1,:);
         NameValues = strsplit(QueryString,';');
@@ -86,6 +92,7 @@ methods (Static)
         end
         RefinedData = alldata(RefinedIndexes,:);
     end
+  
     
     %        StaticCalcMethods
     function PlotGrainDetachmentAverageProbality(QueryString)
@@ -125,16 +132,18 @@ methods (Static)
         end
 
         XBarValues = (1:length(MeanProbalityPerBin))*BinSize - BinSize/2;
-        yyaxis left
+        subplot(2,1,1);
         bar(XBarValues(2:end),MeanProbalityPerBin(2:end),1,'FaceColor','w','EdgeColor',[0 .5 .5],'LineWidth',1.5);
         binranges = round(linspace(min(XBarValues(2:end)), max(XBarValues(2:end)),length(XBarValues)));
         set(gca,'XTick',binranges)
-        set(gca,'fontsize',18,'ycolor',[0 .5 .5]);
+        set(gca,'fontsize',16,'ycolor',[0 .5 .5]);
         xlabel('Detachment size [Pixels]','fontsize',18);
         ylabel('Detachment Probality','fontsize',18);
-        yyaxis right
+        subplot(2,1,2);
         bar(XBarValues(2:end),MinRepeats(2:end),1,'FaceColor','w','EdgeColor',[.5 .5 .5],'LineWidth',1.5);
         ylabel('#Steps to detachment','fontsize',18);
+        xlabel('Detachment size [Pixels]','fontsize',18);
+        set(gca,'fontsize',13)
     end
 end
 
@@ -152,7 +161,7 @@ methods
     function value = get.FilePath(this)
         value = strcat(this.ModelDataPath,'ModelData_',strrep(this.TimeStamp,':',''),'.mat');
     end
-    function value = get.RockImageFile(this)
+    function value = get.RockImageFile(this)%needs to be updated
         switch (this.RockType)
             case 4
                 switch (this.Orientation)
@@ -239,7 +248,8 @@ methods
 
 %%         Methods
     %         Visual 
-    function ShowRockFirstFrame(this)
+    function ShowRockFirstFrameInBB(this)
+        figure;
         imshow(label2rgb(this.RockFirstImage(1:420-129,109:560-109,:)));
     end
     function Rock_Matrixes = GetRockMatrixesByStep(this)
@@ -366,25 +376,43 @@ methods
         ylabel('Weathering (pixels)')
         hold off;
     end
-    function PlotContactAreaFFT(this)
-        %making sure there are no gaps, and forcing an evenly sampled data
-        newTimeSteps=linspace(min(this.StepIds),max(this.StepIds),100*length(this.StepIds));
-        newContactArea=interp1(this.StepIds,[this.Steps.SolutionContactArea],newTimeSteps,'pchip');
-        %% calculationg the fft
-        Y=fft(newContactArea(newContactArea>mean(newContactArea)));
-        %using the squared magnitude to get rid of low signals
-        SquaredMag=(2.*(abs(Y(2:length(Y)/2)).^2))./((length(Y)/2)^2);
-        %calculating the frequency
-        dage=newTimeSteps(2)-newTimeSteps(1);
-        f=(2:(length(Y)/2))./(length(Y)*dage);
-        [pk_1,f0_1] = findpeaks(SquaredMag,f,'SortStr','descend','NPeaks',5);
+    function PlotCompareRoughnessToDetachment(this)
+        a = [this.Steps.SolutionContactArea];
+        b = [this.Steps.Mechanical_Dissolution];
         figure;
-        plot(f,SquaredMag,'k',f0_1,pk_1,'or');
-        text(f0_1,pk_1,num2str(round(1./f0_1(:))),'fontsize',18);
-        xlabel('Frequency','fontsize',18); ylabel('PSD','fontsize',18);
-        set(gca,'fontsize',18);
-        %title('Spectral analysis using fft','fontsize',18);
-        xlim([0,.1])
+        fs =this.SolutionContactStabilizedStepId;
+        ls = this.SolutionContactStabilizedLastStepId;
+        plot(fs:ls-1,abs(diff(a(fs:ls)))*3);
+        hold on;
+        plot(fs:ls,b(fs:ls));
+    end
+    function Peaks = PlotContactAreaFFT(this)
+        StabilizedIndexes = this.SolutionContactStabilizedStepId:this.SolutionContactStabilizedLastStepId;
+        md = [this.Steps.SolutionContactArea];
+        md = md(StabilizedIndexes);
+        Y=fft(md);
+        PosY = 2*Y(2:floor(length(Y)/2))/length(Y);
+        dt=1;
+        f=(2:(length(Y)/2))./(length(Y)*dt);
+        
+        Magnitude = abs(PosY);
+        [peaks,frequencies] = findpeaks(Magnitude,f,'SortStr','descend');
+        Threshold = mean(peaks) + 2*std(peaks);
+        HighPeakIndexes = (peaks > Threshold);
+        TopPeaks = peaks(HighPeakIndexes)';
+        TopFrequencies = frequencies(HighPeakIndexes)';
+        TopPeaks = TopPeaks (1./TopFrequencies > 5);
+        TopFrequencies = TopFrequencies (1./TopFrequencies > 5);
+%         figure;
+%         plot(f,Magnitude,'k',TopFrequencies,TopPeaks,'or');
+%         text(TopFrequencies,TopPeaks,num2str(round(1./TopFrequencies)));
+%         xlabel('Frequency'); ylabel('2|Xn|^2/n^2 , 2|Xn|/n');
+%         title('Spectral analysis using fft');
+        if (length(TopFrequencies) == 0) 
+            Peaks = [];
+        else
+            Peaks = sortrows([1./TopFrequencies TopPeaks (TopPeaks - mean(peaks))/std(peaks)],1,'descend');
+        end
     end
     function Peaks = PlotMechanicalDissolutionFFT(this)
         %% Calculates Mechanical Dissolution FFT and returns Most Significant Peaks (2STD above Mean) and STD  
@@ -404,7 +432,7 @@ methods
         
         Magnitude = abs(PosY);
         [peaks,frequencies] = findpeaks(Magnitude,f,'SortStr','descend');
-        Threshold = mean(peaks) + 1*std(peaks);
+        Threshold = mean(peaks) + 2*std(peaks);
         HighPeakIndexes = (peaks > Threshold);
         TopPeaks = peaks(HighPeakIndexes)';
         TopFrequencies = frequencies(HighPeakIndexes)';

@@ -56,13 +56,23 @@ function Data = RunModel( RockType, NumGrains, DoloRatio, Orientation, IsSmallSi
               =Create_Rock_As_Hex(floor(sqrt(NumGrains)),DoloRatio);
     elseif (RockType == 6)
     % Create_Rock_As_Cracks, NumGrains 0 or 1
-        if (NumGrains)
+        if (NumGrains == 1)
             FileName = 'HighDenseCracks.jpg';
-        else
+        elseif (NumGrains == 0)
             FileName = 'LowDenseCracks.jpg';
+        elseif (NumGrains == 2)
+            FileName = 'Cracks2.jpg';
         end
         [Previous_Rock_Matrix,Height_Threshold,Width_Threshold]...
               =Create_Rock_As_Cracks(FileName);
+    elseif (RockType == 7)
+        % Create_Rock_As_Simon
+        [Previous_Rock_Matrix,Height_Threshold,Width_Threshold]...
+              =Create_Rock_As_Simon(strcat(num2str(NumGrains),'.png'));
+    elseif (RockType == 8)
+        % Create_Rock_As_Brickwall_Diff_Ratio
+        [Previous_Rock_Matrix,Height_Threshold,Width_Threshold]...
+              =Create_Rock_As_Brickwall_Diff_Ratio(floor(sqrt(NumGrains)),DoloRatio,0.5);
     end
     % For testing
     if (IsSmallSize == 1)
