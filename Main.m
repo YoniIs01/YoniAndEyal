@@ -213,9 +213,9 @@ xlswrite(filename,Titles,sheet,strcat(col,int2str(rown)));
 % end
 
 %% 88888
-GrainNums = [800];
-DoloRatios = [1];
-for RockType = 8:8
+GrainNums = [100 200 400 800 1600 3200];
+DoloRatios = [5 8 10 20 30 50 100];
+for RockType = 9:10
     for GrainNumIndex = 1:length(GrainNums)
         NumGrains = GrainNums(GrainNumIndex);
         for DoloRatioIndex = 1:length(DoloRatios)

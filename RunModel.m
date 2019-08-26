@@ -73,6 +73,14 @@ function Data = RunModel( RockType, NumGrains, DoloRatio, Orientation, IsSmallSi
         % Create_Rock_As_Brickwall_Diff_Ratio
         [Previous_Rock_Matrix,Height_Threshold,Width_Threshold]...
               =Create_Rock_As_Brickwall_Diff_Ratio(floor(sqrt(NumGrains)),DoloRatio,0.5);
+    elseif (RockType == 9)
+        % Create_Rock_As_Hex_Diff_Ratio
+        [Previous_Rock_Matrix,Height_Threshold,Width_Threshold]...
+              =Create_Rock_As_Hex_Diff_Ratio(floor(sqrt(NumGrains)),DoloRatio);
+    elseif (RockType == 10)
+        % Create_Rock_As_Table_Diff_Ratio
+        [Previous_Rock_Matrix,Height_Threshold,Width_Threshold]...
+              =Create_Rock_As_Table_Diff_Ratio(floor(sqrt(NumGrains)),DoloRatio);
     end
     % For testing
     if (IsSmallSize == 1)
