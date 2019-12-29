@@ -82,13 +82,8 @@ Calc=Boundaries(Rock_Matrix,round(CC.NumObjects/2),CC.NumObjects-2); %calcite bo
 Rock_Matrix(Rock_Matrix==(CC.NumObjects+1))=1; % Dolomite
 %% Changing Weathering Ratio Between Calcite and CalciteBoundary
 % Rate is BoundaryRate/CalciteRate
-if Ratio < 1 % BoundaryRate < CalciteRate
-    CalciteRate = 100;
-    CacliteBoundaryRate = Ratio*CalciteRate;
-else % BoundaryRate > CalciteRate
-    CacliteBoundaryRate = 100;
-    CalciteRate = floor(CacliteBoundaryRate/Ratio); 
-end
+CalciteRate = 10
+CacliteBoundaryRate = CalciteRate*Ratio;
 
 %%
 Rock_Matrix(Rock_Matrix==(round(CC.NumObjects/2)))=CalciteRate; % Calcite

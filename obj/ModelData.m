@@ -13,6 +13,7 @@ properties (Dependent)
     FileName
     FilePath
     RockImageFile
+    OriginalRockGrainAreas
     RockSize
     StepIds
     TimeStamp
@@ -24,10 +25,13 @@ properties (Dependent)
     SolutionContactStabilizedStepId
     SolutionContactStabilizedLastStepId
     MeanChunckSize
+    WeightedMeanChunckSize
 end
 properties (Constant)
     ModelDataPath = "D:\Program Files\Results Archive\FinalResults\";
     ModelDataExcelPath = "D:\Program Files\Results Archive\FinalResults\FinalModelResults.xlsx";
+   
+    %ModelDataExcelPath = "D:\Program Files\Results Archive\FinalResults\FinalModelResults.xlsx";
     RockTypes = struct('Voronoi',1,'Table',2,'Brickwall',3,'Stylolites',4,'Hex',5,'Cracks',6,'Simon',7);
     RockIds = ["Voronoi" "Table" "Brickwall" "Stylolites" "Hex" "Cracks" "Simon"];
 end
@@ -193,6 +197,18 @@ methods
                 value = '';
         end
     end
+    function value = get.OriginalRockGrainAreas(this)
+        BW = (im2bw(label2rgb(this.RockFirstImage(1:420-129,109:560-109)),0.12)== 0);
+        CC = bwconncomp(BW);
+        if (CC.NumObjects == 0)
+            BW = (im2bw(label2rgb(m.RockFirstImage(1:420-129,109:560-109)),0.2)== 0);
+            CC = bwconncomp(BW);
+        end
+        if (CC.NumObjects == 1)
+            CC = bwconncomp(BW == 0);
+        end
+        value = [cellfun(@(x) length(x),CC.PixelIdxList)];
+    end
     function value = get.RockSize(this)
         value = size(this.RockFirstImage);
     end   
@@ -231,7 +247,14 @@ methods
     function value = get.MeanChunckSize(this)
         e = [this.Steps.ChunckEvents];
         a = [e.Area];
+        a = a(a>10);
         value = mean(a);
+    end
+    function value = get.WeightedMeanChunckSize(this)
+        e = [this.Steps.ChunckEvents];
+        a = [e.Area];
+        a = a(a>10);
+        value = mean(a.^2)/mean(a);
     end
 %%         Constructor
     function this=ModelData(RockType,NumGrains,DoloPercent)
@@ -250,7 +273,21 @@ methods
     %         Visual 
     function ShowRockFirstFrameInBB(this)
         figure;
-        imshow(label2rgb(this.RockFirstImage(1:420-129,109:560-109,:)));
+        imshow(label2rgb(this.RockFirstImageInBB()));
+    end
+    function FirstImage = RockFirstImageInBB(this)
+        FirstImage = this.RockFirstImage(1:420-129,109:560-109,:);
+    end
+    function props = GetInBBObjectsProps(this)
+        FirstImage = this.RockFirstImageInBB;
+        FirstImage = FirstImage == min(FirstImage(:));
+        CC=bwconncomp(FirstImage);
+        props = regionprops(CC,'all');
+    end
+    function P2DMean = GetPerimeterToDiameterMean(this)
+        Mean = mean([this.GetInBBObjectsProps().Perimeter]./[this.GetInBBObjectsProps().EquivDiameter]);
+        Std = std([this.GetInBBObjectsProps().Perimeter]./[this.GetInBBObjectsProps().EquivDiameter]);
+        P2DMean = [Mean Std];
     end
     function Rock_Matrixes = GetRockMatrixesByStep(this)
         Rock_Matrixes = {};
@@ -286,7 +323,7 @@ methods
         Rock_Matrixes = this.GetRockMatrixesByStep();
         j = 1;
         for i=1:length(Rock_Matrixes)
-            if (mod(i,8) == 0)
+            if (mod(i,round(length(Rock_Matrixes)/150)) == 0)
                 RGB_Current_Rock_Matrix = label2rgb(Rock_Matrixes{i});
                 Rock_Frames(j) = im2frame(RGB_Current_Rock_Matrix(1:420-129,109:560-109,:));
                 j = j+1;
@@ -351,6 +388,23 @@ methods
         xlabel('Detachment size (pixles)','fontsize',18);
         ylabel('Frequency','fontsize',18)
         hold off;
+    end
+    function InitialDistribution = GetInitialDistribution(this)
+        props = this.GetInBBObjectsProps();
+        GrainAreas = [props.Area];
+        InitialDistribution = reweightByMass(GrainAreas);
+    end
+    function PlotInitialDistribution(this)
+        histogram(this.GetInitialDistribution(),15);
+    end
+    function DetachedDistribution = GetDetachedDistribution(this)
+        ChunckEvents = [this.Steps.ChunckEvents];
+        ChunckAreas = [ChunckEvents.Area];
+        DetachedAreas = ChunckAreas(ChunckAreas>10);
+        DetachedDistribution = reweightByMass(DetachedAreas);
+    end
+    function PlotDetachedDistribution(this)
+        histogram(this.GetDetachedDistribution(),15);
     end
     
     function PlotCumDissolutionByTimeStep(this)

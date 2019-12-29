@@ -5,7 +5,7 @@
 conn = database('rockmodeling','Yoni','Yoni','com.mysql.jdbc.Driver','jdbc:mysql://localhost:3306/rockmodeling?useSSL=false&');
 if (isempty(conn.Message)) %Connection Succesfull
     %Query Model
-    q = 'RockType=10';
+    q = 'RockType=11';
     n = length(ModelData.QueryModelDataPath(q));
     parfor i=1:n
         m = ModelData.LoadFromQuery(strcat(q),i);

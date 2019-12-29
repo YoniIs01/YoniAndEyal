@@ -81,6 +81,11 @@ function Data = RunModel( RockType, NumGrains, DoloRatio, Orientation, IsSmallSi
         % Create_Rock_As_Table_Diff_Ratio
         [Previous_Rock_Matrix,Height_Threshold,Width_Threshold]...
               =Create_Rock_As_Table_Diff_Ratio(floor(sqrt(NumGrains)),DoloRatio);
+      elseif (RockType == 11)
+        % Create_Rock_Image_with_boundaries_DiffRatio
+        [Previous_Rock_Matrix,Height_Threshold,Width_Threshold]...
+              =Create_Rock_Image_with_boundaries_DiffRatio(DoloRatio,NumGrains);
+          
     end
     % For testing
     if (IsSmallSize == 1)

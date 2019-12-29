@@ -69,12 +69,12 @@ N = @(x,m,s) (exp(-(x - m).^2)./(2.*(s.^2)))./(s.*sqrt(2*pi));
 %%  integral
 g = zeros(1,length(X));
 for Xi = X
-    g = g + f(Xi)*N(X,mu(Xi),sigma(Xi));
+    g = g + f(Xi)*N(X,mu(Xi),sigma(Xi)*100);
 end
 g = g/trapz(X,g);
 
 %% modelResults
-conn = database('rockmodeling','Yoni','Yoni','com.mysql.jdbc.Driver','jdbc:mysql://localhost:3306/rockmodeling?useSSL=false&');
+conn = database('rockmodeling','Yoni','Yoni','com.mysql.jdbc.Driver','jdbc:mysql://localhost:3306/');
 data = fetch(conn,['select ce.Area ' ...
     'from ChunkEvents ce ' ...
     'join models m ' ...
