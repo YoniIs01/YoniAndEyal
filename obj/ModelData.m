@@ -97,7 +97,6 @@ methods (Static)
         RefinedData = alldata(RefinedIndexes,:);
     end
   
-    
     %        StaticCalcMethods
     function PlotGrainDetachmentAverageProbality(QueryString)
         PathList = ModelData.QueryModelDataPath(QueryString);
@@ -198,12 +197,8 @@ methods
         end
     end
     function value = get.OriginalRockGrainAreas(this)
-        BW = (im2bw(label2rgb(this.RockFirstImage(1:420-129,109:560-109)),0.12)== 0);
+        BW = this.RockFirstImage(1:420-129,109:560-109) == mode(this.RockFirstImage(1:420-129,109:560-109),'all');
         CC = bwconncomp(BW);
-        if (CC.NumObjects == 0)
-            BW = (im2bw(label2rgb(m.RockFirstImage(1:420-129,109:560-109)),0.2)== 0);
-            CC = bwconncomp(BW);
-        end
         if (CC.NumObjects == 1)
             CC = bwconncomp(BW == 0);
         end
@@ -364,7 +359,6 @@ methods
         Rock_Frames(j) = im2frame([RGB_Current_Rock_Matrix(1:420-129,109:560-109,:) RGB_SurfaceMatrix(1:420-129,109:560-109,:)]);
         implay(Rock_Frames);
     end
-    
     function SolutionUnderBBox = GetSolutionUnderBBox(this)
         S = zeros(this.RockSize);
         SolutionUnderBBox(1) = 0;
@@ -406,7 +400,6 @@ methods
     function PlotDetachedDistribution(this)
         histogram(this.GetDetachedDistribution(),15);
     end
-    
     function PlotCumDissolutionByTimeStep(this)
         figure;
         hold on;

@@ -1,4 +1,4 @@
-function createfigure4(X1, Y1, Y2, Y3)
+function createfigure4(X1, Y1, Y2, Y3, E1, E2, E3)
 %CREATEFIGURE4(X1, Y1, Y2, Y3)
 %  X1:  scatter x
 %  Y1:  scatter y
@@ -17,10 +17,12 @@ hold(subplot1,'on');
 % Create scatter
 scatter(X1,Y1,'Parent',subplot1,'MarkerFaceColor',[0 0 0],...
     'MarkerEdgeColor',[0 0 0]);
-
+errorbar(X1,Y1,E1,'Color',[0 0 0],'LineStyle','None');
 box(subplot1,'on');
 % Set the remaining axes properties
-set(subplot1,'FontSize',14);
+set(subplot1,'FontSize',18);
+xtickformat('percentage');
+
 % Create subplot
 subplot2 = subplot(3,1,2,'Parent',figure1);
 hold(subplot2,'on');
@@ -29,13 +31,15 @@ hold(subplot2,'on');
 scatter(X1,Y2,'Parent',subplot2,...
     'MarkerFaceColor',[0 0.447058826684952 0.74117648601532],...
     'MarkerEdgeColor',[0 0.447058826684952 0.74117648601532]);
-
+errorbar(X1,Y2,E2,'Color',[0 0.447058826684952 0.74117648601532],'LineStyle','None');
 % Create ylabel
 ylabel('Rate [Pixel/Step]','HorizontalAlignment','center');
 
 box(subplot2,'on');
 % Set the remaining axes properties
-set(subplot2,'FontSize',14);
+set(subplot2,'FontSize',18);
+xtickformat('percentage');
+
 % Create subplot
 subplot3 = subplot(3,1,3,'Parent',figure1);
 hold(subplot3,'on');
@@ -44,10 +48,11 @@ hold(subplot3,'on');
 scatter(X1,Y3,'DisplayName',' 100','Parent',subplot3,...
     'MarkerFaceColor',[1 0 0],...
     'MarkerEdgeColor',[1 0 0]);
-
+errorbar(X1,Y3,E3,'Color',[1 0 0],'LineStyle','None');
 % Create xlabel
 xlabel('Offset','HorizontalAlignment','center');
 
 box(subplot3,'on');
 % Set the remaining axes properties
-set(subplot3,'FontSize',14);
+set(subplot3,'FontSize',18);
+xtickformat('percentage');
