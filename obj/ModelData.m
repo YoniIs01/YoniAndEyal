@@ -29,7 +29,7 @@ properties (Dependent)
 end
 properties (Constant)
     ModelDataPath = "D:\Program Files\Results Archive\FinalResults\";
-    ModelDataExcelPath = "D:\Program Files\Results Archive\FinalResults\FinalModelResults.xlsx";
+    ModelDataExcelPath = "D:\Program Files\Results Archive\FinalResults\FinalModelResults2.xlsx";
    
     %ModelDataExcelPath = "D:\Program Files\Results Archive\FinalResults\FinalModelResults.xlsx";
     RockTypes = struct('Voronoi',1,'Table',2,'Brickwall',3,'Stylolites',4,'Hex',5,'Cracks',6,'Simon',7);
@@ -314,6 +314,28 @@ methods
         SurfaceMatrix = zeros(this.RockSize);
         SurfaceMatrix(this.Steps(StepIndex).SolutionContactLinearIndex) = 1;
     end
+    
+    function PlayReColoredMovie(this)
+        Rock_Matrixes = this.GetRockMatrixesByStep();
+        j = 1;
+        for i=1:length(Rock_Matrixes)
+            %if (mod(i,round(length(Rock_Matrixes)/150)) == 0)
+                RGB_Current_Rock_Matrix = Re_Color_Image(label2rgb(Rock_Matrixes{i}));
+                Rock_Frames(j) = im2frame(RGB_Current_Rock_Matrix(1:420-129,109:560-109,:));
+                j = j+1;
+            %end
+        end
+        RGB_Current_Rock_Matrix = Re_Color_Image(label2rgb(Rock_Matrixes{i}));
+        Rock_Frames(j) = im2frame(RGB_Current_Rock_Matrix(1:420-129,109:560-109,:));
+        implay(Rock_Frames);
+%         v=VideoWriter(this.FileName,'MPEG-4');
+%         v.FrameRate=100;
+%         v.Quality=99;
+%         open(v)
+%         writeVideo(v,Rock_Frames);
+%         close(v)
+    end
+    
     function PlayMovie(this)
         Rock_Matrixes = this.GetRockMatrixesByStep();
         j = 1;
@@ -334,6 +356,7 @@ methods
 %         writeVideo(v,Rock_Frames);
 %         close(v)
     end
+    
     function PlaySurfaceMovie(this)
         j = 1;
         for i = 1:8:length(this.Steps)
