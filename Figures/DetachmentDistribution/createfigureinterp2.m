@@ -32,7 +32,7 @@ plot([Mu Mu],[0 MuYValue]...
     ,'Color',RedColor...
     ,'LineWidth',2 ...
     ,'LineStyle','--');
-text(Mu,MuYValue,'\mu_0','Color',RedColor,'FontSize',24,'VerticalAlignment','Bottom','HorizontalAlignment','right');
+text(Mu,MuYValue,'\mu_0','Color',RedColor,'FontSize',24,'VerticalAlignment','Bottom','HorizontalAlignment','left');
 
 Std = std(initial);
 XStd = xq((Mu-Std < xq) & (xq < Mu+Std));
@@ -57,7 +57,7 @@ plot([Mu Mu],[0 MuYValue]...
     ,'Color',BlackColor...
     ,'LineWidth',2 ...
     ,'LineStyle','--');
-text(Mu,MuYValue,'\mu_d','Color',BlackColor,'FontSize',24,'VerticalAlignment','Bottom','HorizontalAlignment','right');
+text(Mu,MuYValue,'\mu_d','Color',BlackColor,'FontSize',24,'VerticalAlignment','Bottom','HorizontalAlignment','left');
 
 Std = std(initial);
 XStd = xq((Mu-Std < xq) & (xq < Mu+Std));
@@ -65,10 +65,10 @@ YStd = vq2((Mu-Std < xq) & (xq < Mu+Std));
 area(XStd, YStd, 'FaceAlpha',0.3, 'FaceColor',BlackColor,'LineStyle','none','DisplayName','\sigma_d');
 
 % Create ylabel
-ylabel('Normalized mass [Pixel]','FontSize',18);
+ylabel('Normalized mass [Pixel]','FontSize',20);
 % Create xlabel
-xlabel('Particle diameter [Pixel]','FontSize',18);
+xlabel('Particle diameter [Pixel]','FontSize',20);
 % Set the remaining axes properties
-set(gca,'FontSize',18);
+set(gca,'FontSize',20);
 ylim([0 YMaxInitial + YMaxInitial/10]);
-legend('Location','Best');
+legend('Location','northeast','box','off');

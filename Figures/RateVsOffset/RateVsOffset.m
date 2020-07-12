@@ -38,20 +38,20 @@ clear conn
 
 
 %% Plotting
-figure;
+%figure;
 i = 1;
 Y = [];
 Err = [];
-for i = 1:size(data,1)
-    m = ModelData.Load(data{i,1});
-    Temp_Tau_Factor=TauFactor('InLine',1,1,0,m.RockFirstImageInBB~=100,[1 1 0;0 0 0;0 0 0],[1 1 1]);
-    Tau_Factors_Down(i)=Temp_Tau_Factor.Tau_B1.Tau;
-    Tau_Factors_LR(i)=Temp_Tau_Factor.Tau_B2.Tau;
-    Densities(i)=100*Temp_Tau_Factor.Tau_B1.VolFrac;
-    Surf_Area(i)=Temp_Tau_Factor.Metrics.SurfAreaDens_over_um
-end
-data_updated=[Tau_Factors_Down' Tau_Factors_LR' Surf_Area'];
-data3=[data num2cell(data_updated)];
+% for i = 1:size(data,1)
+%     m = ModelData.Load(data{i,1});
+%     Temp_Tau_Factor=TauFactor('InLine',1,1,0,m.RockFirstImageInBB~=100,[1 1 0;0 0 0;0 0 0],[1 1 1]);
+%     Tau_Factors_Down(i)=Temp_Tau_Factor.Tau_B1.Tau;
+%     Tau_Factors_LR(i)=Temp_Tau_Factor.Tau_B2.Tau;
+%     Densities(i)=100*Temp_Tau_Factor.Tau_B1.VolFrac;
+%     Surf_Area(i)=Temp_Tau_Factor.Metrics.SurfAreaDens_over_um
+% end
+% data_updated=[Tau_Factors_Down' Tau_Factors_LR' Surf_Area'];
+% data3=[data num2cell(data_updated)];
 
 for NumGrain = unique(data.NumGrains)'
     Indexes = (data.NumGrains == NumGrain);
@@ -62,5 +62,6 @@ for NumGrain = unique(data.NumGrains)'
     i = i+1;
 end
 X1 = cellfun(@str2num,data.Orientation(Indexes))*100;
-createfigure4(X1,Y(:,1),Y(:,2),Y(:,3),Err(:,1),Err(:,2),Err(:,3))
+%createfigure4(X1,Y(:,1),Y(:,2),Y(:,3),Err(:,1),Err(:,2),Err(:,3))
+createfigure4(X1(1:6),Y(1:6,1),Y(1:6,2),Y(1:6,3),Err(1:6,1),Err(1:6,2),Err(1:6,3))
 

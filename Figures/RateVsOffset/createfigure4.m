@@ -15,44 +15,50 @@ subplot1 = subplot(3,1,1,'Parent',figure1);
 hold(subplot1,'on');
 
 % Create scatter
-scatter(X1,Y1,'Parent',subplot1,'MarkerFaceColor',[0 0 0],...
-    'MarkerEdgeColor',[0 0 0]);
-errorbar(X1,Y1,E1,'Color',[0 0 0],'LineStyle','None');
+errorbar(X1,Y1,E1,'o','Color',[0 0 0],'MarkerSize',8,'MarkerFaceColor',[0 0 0],...
+   'MarkerEdgeColor',[0 0 0],'DisplayName','\mu_0=2160');
 box(subplot1,'on');
 % Set the remaining axes properties
-set(subplot1,'FontSize',18);
+set(subplot1,'FontSize',20);
 xtickformat('percentage');
+ylim([75 120]);
+xlabel('Offset','HorizontalAlignment','center');
+ylabel('Rate [Pixel/Step]','HorizontalAlignment','center');
+
+legend('Location','northeast','Box', 'off');
 
 % Create subplot
 subplot2 = subplot(3,1,2,'Parent',figure1);
 hold(subplot2,'on');
 
 % Create scatter
-scatter(X1,Y2,'Parent',subplot2,...
-    'MarkerFaceColor',[0 0.447058826684952 0.74117648601532],...
-    'MarkerEdgeColor',[0 0.447058826684952 0.74117648601532]);
-errorbar(X1,Y2,E2,'Color',[0 0.447058826684952 0.74117648601532],'LineStyle','None');
+errorbar(X1,Y2,E2,'o','Color',[0, 0, 0.75],'MarkerSize',8,'MarkerFaceColor',[0, 0, 0.75],...
+   'MarkerEdgeColor',[0, 0, 0.75],'DisplayName','\mu_0=234');
 % Create ylabel
+xlabel('Offset','HorizontalAlignment','center');
 ylabel('Rate [Pixel/Step]','HorizontalAlignment','center');
 
 box(subplot2,'on');
 % Set the remaining axes properties
-set(subplot2,'FontSize',18);
+set(subplot2,'FontSize',20);
 xtickformat('percentage');
+ylim([75 120]);
+legend('Orientation','horizontal','Location','northeast','Box', 'off');
 
 % Create subplot
 subplot3 = subplot(3,1,3,'Parent',figure1);
 hold(subplot3,'on');
 
 % Create scatter
-scatter(X1,Y3,'DisplayName',' 100','Parent',subplot3,...
-    'MarkerFaceColor',[1 0 0],...
-    'MarkerEdgeColor',[1 0 0]);
-errorbar(X1,Y3,E3,'Color',[1 0 0],'LineStyle','None');
+errorbar(X1,Y3,E3,'o','Color',[.75, 0, 0],'MarkerSize',8,'MarkerFaceColor',[.75, 0, 0],...
+   'MarkerEdgeColor',[.75, 0, 0],'DisplayName','\mu_0=108');
 % Create xlabel
 xlabel('Offset','HorizontalAlignment','center');
+ylabel('Rate [Pixel/Step]','HorizontalAlignment','center');
 
 box(subplot3,'on');
 % Set the remaining axes properties
-set(subplot3,'FontSize',18);
+set(subplot3,'FontSize',20);
 xtickformat('percentage');
+ylim([75 120]);
+legend('Orientation','horizontal','Location','northeast','Box', 'off');

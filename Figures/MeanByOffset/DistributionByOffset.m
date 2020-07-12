@@ -12,5 +12,6 @@ for i = 1:length(unique(data.NumGrains))
 end
 
 X1 = cellfun(@str2num,data.Orientation(Indexes))*100;
-createfigure3(X1,Y(:,1),Y(:,2),Y(:,3),Errors(:,1),Errors(:,2),Errors(:,3))
+%createfigure3(X1,Y(:,1),Y(:,2),Y(:,3),Errors(:,1),Errors(:,2),Errors(:,3))
+createfigure3(X1(1:6),Y(1:6,1),Y(1:6,2),Y(1:6,3),Errors(1:6,1),Errors(1:6,2),Errors(1:6,3))
 %createfigure4_2_GS(X1,Y(:,1),Y(:,2),Y(:,3),Errors(:,1),Errors(:,2),Errors(:,3),Tau(:,1),Tau(:,2),Tau(:,3))

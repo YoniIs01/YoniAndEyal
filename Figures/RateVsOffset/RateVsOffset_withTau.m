@@ -66,20 +66,20 @@ for NumGrain = unique(data3.NumGrains)'
 end
 close all;
 %X1 = cellfun(@str2num,data3.Orientation(Indexes))*100;
-createfigure4_3(Y(:,1),Y(:,2),Y(:,3),Err(:,1),Err(:,2),Err(:,3),Tau(:,1),Tau(:,2),Tau(:,3))
+%createfigure4_3(Y(:,1),Y(:,2),Y(:,3),Err(:,1),Err(:,2),Err(:,3),Tau(:,1),Tau(:,2),Tau(:,3))
 figure;
 hold on;
-errorbar(Tau(:,1),Y(:,1),Err(:,1),'o','MarkerSize',5,'MarkerFaceColor',[0 0 0],...
+errorbar(Tau(:,1),Y(:,1),Err(:,1),'o','MarkerSize',8,'MarkerFaceColor',[0 0 0],...
     'MarkerEdgeColor',[0 0 0],'Color',[0 0 0],'DisplayName','\mu_0=2160');
-errorbar(Tau(:,2),Y(:,2),Err(:,2),'o','MarkerSize',5,'MarkerFaceColor',[0 0 1],...
-    'MarkerEdgeColor',[0 0 1],'Color',[0 0 1],'DisplayName','\mu_0=234');
-errorbar(Tau(:,3),Y(:,3),Err(:,3),'o','MarkerSize',5,'MarkerSize',5,'MarkerFaceColor',[1 0 0],...
-    'MarkerEdgeColor',[1 0 0],'Color',[1 0 0],'DisplayName','\mu_0=108');
-xlabel('Turtuosity Factor','HorizontalAlignment','center');
+errorbar(Tau(:,2),Y(:,2),Err(:,2),'o','MarkerSize',8,'MarkerFaceColor',[0, 0, 0.75],...
+    'MarkerEdgeColor',[0, 0, 0.75],'Color',[0, 0, 0.75],'DisplayName','\mu_0=234');
+errorbar(Tau(:,3),Y(:,3),Err(:,3),'o','MarkerSize',8,'MarkerSize',8,'MarkerFaceColor',[.75, 0, 0],...
+    'MarkerEdgeColor',[.75, 0, 0],'Color',[.75, 0, 0],'DisplayName','\mu_0=108');
+xlabel('Tortuosity Factor','HorizontalAlignment','center');
 ylabel('Rate [Pixels/Step]','HorizontalAlignment','center','Color','k','FontSize',20);
 ylim([min(min([Y(:,1) Y(:,2) Y(:,3)]))-5,max(max([Y(:,1) Y(:,2) Y(:,3)]))+5]);
 xlim([min(min([Tau(:,1) Tau(:,2) Tau(:,3)]))-0.1,max(max([Tau(:,1) Tau(:,2) Tau(:,3)]))+0.1]);
-legend('Orientation','horizontal','Location','northeast','Box', 'off');
+legend('Orientation','vertical','Location','northeast','Box', 'off');
 set(gca,'FontSize',20,'box','on');
 
 %%

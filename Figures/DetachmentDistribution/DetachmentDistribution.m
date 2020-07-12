@@ -1,7 +1,9 @@
 clear;
-q = strcat('RockType=6;NumGrains=1');
-IsStylos = 0;
 
+q = strcat('RockType=6;NumGrains=1');
+
+IsStylos = 0;
+%m = load('ModelData_2019-3-25_225047.27.mat');
 % ForStyols
 OriginalRatio = 1/61;
 Scale = 3.3;
@@ -23,9 +25,9 @@ if (IsStylos)
     createfigureinterp2(Sinitial, Sfinal, BinWidth, N);
 end
 
-    BinWidth = 700;
+    BinWidth = 70;
 %     createfigureinterp(initial, final, BinWidth, N);
-    createfigureinterp2(initial, final, BinWidth, N);
+    createfigureinterp2(initial, final, BinWidth,1);
 
 if (IsStylos)
     xlabel('Particle diameter [cm^2]')
